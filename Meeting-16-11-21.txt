@@ -1,0 +1,11 @@
+Agenda
+
+Thesis structure
+Miro board: https://miro.com/app/board/o9J_lii8RCE=/?invite_link_id=197899446520
+
+Taks list
+Fixating the structure for the baseline model (formulate)
+Start investigating hyperparameter optimization literature
+
+Future meeting topic:
+    Refinement of structure
