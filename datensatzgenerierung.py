@@ -4,6 +4,7 @@ from pathlib import Path
 from copy import deepcopy
 import fastText as fasttext
 import fasttext.util
+
 ft = fasttext.load_model('cc.de.300.bin')
 
 
@@ -12,6 +13,7 @@ def missing_val(x):
         x = -1
     return int(x)
 
+
 # ratio ist prozentsatz von trainingsdaten, also 0.2 bedeutet 20% trainings daten, 80% testdaten
 # augmentation: wenn True, werden Daten aus dem Wörterbuch durch groß/kleinschreibung verdoppelt
 # oesch: kann "oesch8" oder "oesch16" sein, welche Daten als True Werte genommen werden
@@ -19,8 +21,7 @@ def missing_val(x):
 # Selbstständige und Datensatz nur mit Selbstständigen
 class Datengenerierer:
 
-
-    def __init__(self, ratio: float, augmentation:bool, oesch:str, selbstständige: str, random_state:int):
+    def __init__(self, ratio: float, augmentation: bool, oesch: str, selbstständige: str, random_state: int):
         self.ratio = ratio
         self.augmentation = augmentation
         self.oesch = oesch
@@ -44,7 +45,6 @@ class Datengenerierer:
                 Welle_1_clean = Welle_1[
                     Welle_1.oesch8.isin(["1", "2"])]
 
-
         # ich caste alle Daten für das meta-Modell zu integern ersetze in den Daten die fehlenden Werte durch -1
         if self.selbstständige == "ohne":
             Welle_1_clean[
@@ -59,13 +59,12 @@ class Datengenerierer:
                 ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
                  'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']] = Welle_1_clean[
                 ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat','selbst_gr']].applymap(lambda x: missing_val(x))
+                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].applymap(lambda x: missing_val(x))
 
         # teile datensatz in 60% trainings und 40% validierungsdatensatz
+        # TODO diese aufteilung mache ich nicht mehr
         self.w1_training = Welle_1_clean.sample(frac=self.ratio, random_state=self.random_state)
         self.w1_validation = Welle_1_clean.drop(self.w1_training.index)
-
-
 
     def make_dataset(self):
 
@@ -100,7 +99,7 @@ class Datengenerierer:
             # hier verwende ich auch die Spalten erw_stat und selbst_gr
             X_meta_2 = Daten_2_clean[
                 ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat','selbst_gr']]
+                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']]
 
         y_meta_2 = Daten_2_clean[self.oesch].astype(int)
 
@@ -131,9 +130,8 @@ class Datengenerierer:
             # hier verwende ich auch erw_stat und selbst_gr
             X_meta_3 = Daten_3_clean[
                 ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat','selbst_gr']]
+                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']]
         y_meta_3 = Daten_3_clean[self.oesch].astype(int)
-
 
         # ich caste alle Daten zu integern ersetze in den Daten die fehlenden Werte durch -1
         # außerdem caste ich Datensatz zu numpy array
@@ -145,6 +143,8 @@ class Datengenerierer:
         X_meta = np.concatenate((X_meta_2, X_meta_3), axis=0)
         y_meta = np.concatenate((y_meta_2, y_meta_3), axis=0)
 
+        # TODO hier muss ich was ändern denn es gehört zur postsplit pipeline, weil hier die Trainingsdaten anders
+        # behandelt werden müssen als die Testdaten
         if self.selbstständige == "ohne":
             # Wörterbuch_de als Trainingsdatensatz für Fasttext, ohne Selbstständige
 
@@ -166,6 +166,8 @@ class Datengenerierer:
 
         # Datensatz X_wb, y_wb besteht aus einer Matrix X_wb mit der Anzahl der Wörterbucheinträge als zeilen, und 300 spalten
         # die zeilen stehen für Datenpunkte, die spalten enthalten den 300 dimensionalen Fasttext embedding vektor
+
+        # TODO: hier muss ich auch was ändern, denn ich darf nur die trainingsdaten augmentieren
 
         # erstelle trainingsdatensatz für Fasttext Modell, indem alle Zeilen verdoppelt werden einmal mit .lower()
         w1_training_lower = deepcopy(self.w1_training)
@@ -190,8 +192,10 @@ class Datengenerierer:
         elif self.selbstständige == "nur":
             X_w1_meta = self.w1_training[
                 ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat','selbst_gr']].to_numpy()
+                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].to_numpy()
         y_w1_meta = self.w1_training[self.oesch].astype(int).to_numpy()
+
+        # Todo: hier muss ich auch was ändern, denn ich darf das nur mit Validierungsdaten machen
 
         # füge bei Validierungsdatensatz Spalte mit Embeddings hinzu
         self.w1_validation["embeddings"] = self.w1_validation["taetigk"].apply(ft.get_word_vector)
@@ -202,6 +206,7 @@ class Datengenerierer:
         # mache matrix aus den Trainingsdaten
         X_w1v_ft = np.vstack((X_w1v_ft[i] for i in range(len(X_w1v_ft))))
 
+        # Todo: hier muss ich auch was ändern, denn ich darf das nur mit Validierungsdaten machen
         # erstelle meta Model validation datensatz
         if self.selbstständige == "ohne":
             X_w1v_meta = self.w1_validation[
@@ -210,9 +215,10 @@ class Datengenerierer:
         elif self.selbstständige == "nur":
             X_w1v_meta = self.w1_validation[
                 ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat','selbst_gr']].to_numpy()
+                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].to_numpy()
         y_w1v_meta = self.w1_validation[self.oesch].astype(int).to_numpy()
 
+        # Todo: hier muss ich auch was ändern
         # verbinde Datensätze wb und w1 fasttext für das Training des Fasttext Modells
         if self.selbstständige == "ohne":
             X_ft_train = np.concatenate((X_wb, X_w1_ft))
@@ -221,6 +227,7 @@ class Datengenerierer:
             X_ft_train = X_w1_ft
             y_ft_train = y_w1_ft
 
+        # Todo: das schufflen brauche ich wahrscheinlich nicht mehr weil ich das bei k-fold crossvalidation tue
         from sklearn.utils import shuffle
         X_ft_train, y_ft_train = shuffle(X_ft_train, y_ft_train, random_state=self.random_state)
 
@@ -231,6 +238,7 @@ class Datengenerierer:
         from sklearn.utils import shuffle
         X_meta_train, y_meta_train = shuffle(X_meta_train, y_meta_train, random_state=self.random_state)
 
+        # Todo: hier muss ich drauf achten, dass die daten das richtige Format haben zur weiteren Verarbeitung
         trainingsdaten = [X_ft_train, y_ft_train, X_meta_train, y_meta_train]
         validierungsdaten = [X_w1v_ft, y_w1v_ft, X_w1v_meta, y_w1v_meta]
         return trainingsdaten, validierungsdaten
@@ -250,7 +258,7 @@ class Datengenerierer:
         elif self.selbstständige == "nur":
             X_meta = self.w1_training[
                 ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat','selbst_gr']].to_numpy()
+                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].to_numpy()
         meta_proba = meta_model.predict_proba(X_meta)
 
         # Füge Daten  zusammen
@@ -270,7 +278,7 @@ class Datengenerierer:
         elif self.selbstständige == "nur":
             X_meta_val = self.w1_validation[
                 ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat','selbst_gr']].to_numpy()
+                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].to_numpy()
         meta_proba_val = meta_model.predict_proba(X_meta_val)
 
         # Füge Daten  zusammen
@@ -280,4 +288,3 @@ class Datengenerierer:
         trainingsdaten = [X_train, y_train]
         validierungsdaten = [X_val, y_val]
         return trainingsdaten, validierungsdaten
-

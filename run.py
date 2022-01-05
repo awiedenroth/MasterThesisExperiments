@@ -13,9 +13,13 @@ if not sys.warnoptions:
 # ständige, nur selbstständige, anderer random seed (zb 42)
 
 if __name__ == "__main__":
+    # percentage of trainingsdaten wird erst später gebraucht
     datengenerierer = Datengenerierer(0.80,True,"oesch8","nur",0)
+    # gebe nur kompletten datensatz zurück
     trainingsdaten, validierungsdaten = datengenerierer.make_dataset()
+    # splitte hier erst in trainings und validierungsdaten auf für crossvalidation
 
+    # hier füge ich die anderen Metriken hinzu
     modelltrainer = Modelltrainer(0, "merror")
     evaluierer = Evaluierer()
 
