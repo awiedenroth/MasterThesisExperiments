@@ -130,3 +130,15 @@ dmypy.json
 *.odt#
 
 .idea/
+
+Daten/
+
+Ergebnisse/
+*.bin
+*.gz
+fastText/
+*.csv
+*.pkl
+*.xlsx#
+*.xlsx#
+Wörterbücher/.~lock.isco08_Hinweise zur Kodierung.xlsx#
