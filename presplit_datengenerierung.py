@@ -95,3 +95,50 @@ class Datengenerierer:
 
         # ich gebe zurück: fasttext daten, fasttext labels, meta daten, meta_labels
         return  X_w1_ft, y_w1_ft, X_w1_meta, y_w1_meta
+
+# Todo: das sollte vermutlich eine eigene Klasse sein
+    def make_combi_dataset(self, ft_model, meta_model):
+
+        # generiere Fasttext daten
+        X_ft = self.w1_training["taetigk"].apply(ft.get_word_vector).values
+        X_ft = np.vstack((X_ft[i] for i in range(len(X_ft))))
+        fasttext_proba = ft_model.predict_proba(X_ft)
+
+        # generiere Meta daten
+        if self.selbstständige == "ohne":
+            X_meta = self.w1_training[
+                ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
+                 'beab', 'einkommen', 'besch_arbzeit']].to_numpy()
+        elif self.selbstständige == "nur":
+            X_meta = self.w1_training[
+                ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
+                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].to_numpy()
+        meta_proba = meta_model.predict_proba(X_meta)
+
+        # Füge Daten  zusammen
+        X_train = np.concatenate((fasttext_proba, meta_proba), axis=1)
+        y_train = self.w1_training[self.oesch].astype(int).to_numpy()
+
+        # generiere Fasttext daten für validation
+        X_ft_val = self.w1_validation["taetigk"].apply(ft.get_word_vector).values
+        X_ft_val = np.vstack((X_ft_val[i] for i in range(len(X_ft_val))))
+        fasttext_proba_val = ft_model.predict_proba(X_ft_val)
+
+        # generiere Meta daten für validation
+        if self.selbstständige == "ohne":
+            X_meta_val = self.w1_validation[
+                ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
+                 'beab', 'einkommen', 'besch_arbzeit']].to_numpy()
+        elif self.selbstständige == "nur":
+            X_meta_val = self.w1_validation[
+                ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
+                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].to_numpy()
+        meta_proba_val = meta_model.predict_proba(X_meta_val)
+
+        # Füge Daten  zusammen
+        X_val = np.concatenate((fasttext_proba_val, meta_proba_val), axis=1)
+        y_val = self.w1_validation[self.oesch].astype(int).to_numpy()
+
+        trainingsdaten = [X_train, y_train]
+        validierungsdaten = [X_val, y_val]
+        return trainingsdaten, validierungsdaten

@@ -18,6 +18,10 @@ if __name__ == "__main__":
     datengenerierer = Datengenerierer("oesch8","nur")
 
     X_fasttext, y_fasttext, X_meta, y_meta = datengenerierer.make_dataset()
+    print(X_fasttext.shape)
+    print(y_fasttext.shape)
+    print(X_meta.shape)
+    print(y_meta.shape)
     #dict zum abspeichern der ergebnisse
     ergebnisse = {}
     # index um zu tracken bei welchem durchgang man ist
@@ -26,12 +30,18 @@ if __name__ == "__main__":
     # die for schleife geht k mal durch
     for train_index, test_index in kf.split(X_fasttext):
         print("Durchgang ", i)
+        print(train_index)
+        print(test_index)
+        print(X_fasttext[test_index])
+        print(X_fasttext[train_index])
+
         # erstelle die fasttext trainings und test daten
         X_train_fasttext, X_test_fasttext = X_fasttext[train_index], X_fasttext[test_index]
         y_train_fasttext, y_test_fasttext = y_fasttext[train_index], y_fasttext[test_index]
         # erstelle die meta modell trainings und test daten
         X_train_meta, X_test_meta = X_meta[train_index], X_meta[test_index]
         y_train_meta, y_test_meta = y_meta[train_index], y_meta[test_index]
+        print("Anteil Trainingsdaten = ", len(X_train_fasttext), "von", len(X_fasttext))
 
         #Todo: Datenaugmentierung
 
@@ -58,7 +68,7 @@ if __name__ == "__main__":
             #pickle.dump(fasttext_model, f)
         #json.dump(evaluation_fasttext, open("Ergebnisse/fasttext_8_80_n_0.json", 'w'))
 
-        print("trainiere Combi Modell")
+        """print("trainiere Combi Modell")
         train, val = datengenerierer.make_combi_dataset(fasttext_model, meta_model)
         combi_model = modelltrainer.train_combi(train[0], train[1], hyperparameter=None)
         evaluation_combi = evaluierer.make_evaluation(combi_model, train[0], train[1],
@@ -66,17 +76,17 @@ if __name__ == "__main__":
         print("Combi Modell evaluation: ", evaluation_combi)
         with open("Trained_Models/combi_8_80_n_0.pkl", "wb") as f:
             pickle.dump(combi_model, f)
-        json.dump(evaluation_combi, open("Ergebnisse/combi_8_80_n_0.json", 'w'))
+        json.dump(evaluation_combi, open("Ergebnisse/combi_8_80_n_0.json", 'w'))"""
 
 
-        for confidence in [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,0.992,0.994,0.995, 0.996, 0.997]:
+        """for confidence in [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,0.992,0.994,0.995, 0.996, 0.997]:
             path = "Ergebnisse/combi_8_80_n_0_"
             evaluation_combi_confidence = evaluierer.make_evaluation_confidence(combi_model, train[0], train[1],
                                                           val[0], val[1], confidence)
             print("Combi Modell evaluation mit confidence", confidence, evaluation_combi_confidence)
             path += str(confidence) + ".json"
-            json.dump(evaluation_combi_confidence, open(path, 'w'))
-        ergebnisse[i] = {"meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi}
+            json.dump(evaluation_combi_confidence, open(path, 'w'))"""
+        ergebnisse[i] = {"meta":evaluation_meta, "fasttext": evaluation_fasttext}
         i = i+1
 
     json.dump(ergebnisse, open("Ergebnisse/kfold_8_nur", 'w'))
