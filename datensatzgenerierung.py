@@ -231,7 +231,7 @@ class Datengenerierer:
         from sklearn.utils import shuffle
         X_ft_train, y_ft_train = shuffle(X_ft_train, y_ft_train, random_state=self.random_state)
 
-        # verbinde Datensätze meta und w1 meta für das Training des Fasttext Modells
+        # verbinde Datensätze meta und w1 meta für das Training des Meta Modells
         X_meta_train = np.concatenate((X_meta, X_w1_meta))
         y_meta_train = np.concatenate((y_meta, y_w1_meta))
 
@@ -243,6 +243,7 @@ class Datengenerierer:
         validierungsdaten = [X_w1v_ft, y_w1v_ft, X_w1v_meta, y_w1v_meta]
         return trainingsdaten, validierungsdaten
 
+# Todo: das sollte vermutlich eine eigene Klasse sein
     def make_combi_dataset(self, ft_model, meta_model):
 
         # generiere Fasttext daten
