@@ -6,6 +6,7 @@ import pickle
 import json
 import sys
 import warnings
+from pprint import pprint
 
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
@@ -15,7 +16,7 @@ if not sys.warnoptions:
 if __name__ == "__main__":
     # hier muss ich angeben ob ich Oesch8 oder Oesch16 möchte und ob ich "nur" Selbstständige oder "ohne" Selbstständige haben möchte
     #Todo: hier könnte ich statt strings für oesch und selbstständige etwas eleganter Oesch=8 bzw Oesch=16 und Selbstständige = true/false machen
-    datengenerierer = Datengenerierer("oesch8","nur")
+    datengenerierer = Datengenerierer("oesch8","ohne")
 
     X_fasttext, y_fasttext, X_meta, y_meta = datengenerierer.make_dataset()
     print(X_fasttext.shape)
@@ -30,14 +31,10 @@ if __name__ == "__main__":
     # die for schleife geht k mal durch
     for train_index, test_index in kf.split(X_fasttext):
         print("Durchgang ", i)
-        print(train_index)
-        print(test_index)
-        print(X_fasttext[test_index])
-        print(X_fasttext[train_index])
 
         # erstelle die fasttext trainings und test daten
         X_train_fasttext, X_test_fasttext = X_fasttext[train_index], X_fasttext[test_index]
-        y_train_fasttext, y_test_fasttext = y_fasttext[train_index], y_fasttext[test_index]
+        y_train_fasttext, y_test_fasttext = y_fasttext.iloc[train_index], y_fasttext.iloc[test_index]
         # erstelle die meta modell trainings und test daten
         X_train_meta, X_test_meta = X_meta[train_index], X_meta[test_index]
         y_train_meta, y_test_meta = y_meta[train_index], y_meta[test_index]
@@ -89,4 +86,5 @@ if __name__ == "__main__":
         ergebnisse[i] = {"meta":evaluation_meta, "fasttext": evaluation_fasttext}
         i = i+1
 
-    json.dump(ergebnisse, open("Ergebnisse/kfold_8_nur", 'w'))
+    json.dump(ergebnisse, open("Ergebnisse/kfold_8_ohne", 'w'))
+    pprint(ergebnisse)
