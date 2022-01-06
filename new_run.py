@@ -1,6 +1,7 @@
-from datensatzgenerierung import Datengenerierer
+from presplit_datengenerierung import Datengenerierer
 from modelltraining import Modelltrainer
 from evaluation import Evaluierer
+from sklearn.model_selection import KFold
 import pickle
 import json
 import sys
@@ -9,14 +10,29 @@ import warnings
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
-# Name des modells und ergebnisse: modell, oesch16/oesch8, 80%/90%/... Trainingsdaten, o/n "ohne Selbst
-# ständige, nur selbstständige, anderer random seed (zb 42)
+
 
 if __name__ == "__main__":
-    # percentage of trainingsdaten wird erst später gebraucht
-    datengenerierer = Datengenerierer(0.80,True,"oesch8","ohne",0)
+    # hier muss ich angeben ob ich Oesch8 oder Oesch16 möchte und ob ich "nur" Selbstständige oder "ohne" Selbstständige haben möchte
+    #Todo: hier könnte ich statt strings für oesch und selbstständige etwas eleganter Oesch=8 bzw Oesch=16 und Selbstständige = true/false machen
+    datengenerierer = Datengenerierer("oesch8","nur")
+
+    X_fasttext, y_fasttext, X_meta, y_meta = datengenerierer.make_dataset()
+    kf = KFold(n_splits=8)
+    # die for schleife geht k mal durch
+    for train_index, test_index in kf.split(X_fasttext):
+        # erstelle die fasttext trainings und test daten
+        X_train_fasttext, X_test_fasttext = X_fasttext[train_index], X_fasttext[test_index]
+        y_train_fasttext, y_test_fasttext = y_fasttext[train_index], y_fasttext[test_index]
+        # erstelle die meta modell trainings und test daten
+        X_train_meta, X_test_meta = X_meta[train_index], X_meta[test_index]
+        y_train_meta, y_test_meta = y_meta[train_index], y_meta[test_index]
+
+
+
+    # wie mache ich das jetzt mit k-fold crossvalidation? ich sollte darauf achten dass das für meta und fasttext daten gleichzetig passiert
     # gebe nur kompletten datensatz zurück
-    trainingsdaten, validierungsdaten = datengenerierer.make_dataset()
+    #trainingsdaten, validierungsdaten = datengenerierer.make_dataset()
     # splitte hier erst in trainings und validierungsdaten auf für crossvalidation
 
     # hier füge ich die anderen Metriken hinzu

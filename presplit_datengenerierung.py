@@ -21,12 +21,11 @@ def missing_val(x):
 # Selbstständige und Datensatz nur mit Selbstständigen
 class Datengenerierer:
 
-    def __init__(self, ratio: float, augmentation: bool, oesch: str, selbstständige: str, random_state: int):
-        self.ratio = ratio
-        self.augmentation = augmentation
+    def __init__(self, oesch: str, selbstständige: str):
+
         self.oesch = oesch
         self.selbstständige = selbstständige
-        self.random_state = random_state
+
 
         # Datensatzgenerierung aus Welle 1: 60% Trainingsdaten und 40% Validierungsdaten
         Welle_1 = pd.read_csv("./Daten/wic_beruf-w1_data.csv", sep=";")
@@ -63,11 +62,11 @@ class Datengenerierer:
 
         # teile datensatz in 60% trainings und 40% validierungsdatensatz
         # TODO diese aufteilung mache ich nicht mehr
-        #self.w1_training = Welle_1_clean.sample(frac=self.ratio, random_state=self.random_state)
+        self.w1_training = Welle_1_clean
         #self.w1_validation = Welle_1_clean.drop(self.w1_training.index)
 
     # Hier erstelle ich den Grund-Datensatz für das Fasttext Modell, indem ich die embeddings und die Oesch Werte extrahiere
-    def make_fasttext_dataset(self):
+    def make_dataset(self):
 
         ft = fasttext.load_model('cc.de.300.bin')
 
@@ -82,13 +81,6 @@ class Datengenerierer:
         # mache matrix aus den Trainingsdaten
         X_w1_ft = np.vstack((X_w1_ft[i] for i in range(len(X_w1_ft))))
 
-
-        # Todo: hier muss ich drauf achten, dass die daten das richtige Format haben zur weiteren Verarbeitung
-        trainingsdaten = [X_w1_ft, y_w1_ft]
-        return trainingsdaten
-
-    def make_meta_dataset(self):
-
         if self.selbstständige == "ohne":
             # erstelle trainingsdatemsatz für meta Modell als np array
             X_w1_meta = self.w1_training[
@@ -101,7 +93,5 @@ class Datengenerierer:
                  'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].to_numpy()
         y_w1_meta = self.w1_training[self.oesch].astype(int).to_numpy()
 
-
-        # Todo: hier muss ich drauf achten, dass die daten das richtige Format haben zur weiteren Verarbeitung
-        trainingsdaten = [X_w1_meta, y_w1_meta]
-        return trainingsdaten
+        # ich gebe zurück: fasttext daten, fasttext labels, meta daten, meta_labels
+        return  X_w1_ft, y_w1_ft, X_w1_meta, y_w1_meta
