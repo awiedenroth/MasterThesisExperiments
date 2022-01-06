@@ -143,7 +143,7 @@ class Datengenerierer:
         X_meta = np.concatenate((X_meta_2, X_meta_3), axis=0)
         y_meta = np.concatenate((y_meta_2, y_meta_3), axis=0)
 
-        # TODO hier muss ich was ändern denn es gehört zur postsplit pipeline, weil hier die Trainingsdaten anders
+        #TODO hier muss ich was ändern denn es gehört zur postsplit pipeline, weil hier die Trainingsdaten anders
         # behandelt werden müssen als die Testdaten
         if self.selbstständige == "ohne":
             # Wörterbuch_de als Trainingsdatensatz für Fasttext, ohne Selbstständige

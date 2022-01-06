@@ -86,3 +86,22 @@ class Datengenerierer:
         # Todo: hier muss ich drauf achten, dass die daten das richtige Format haben zur weiteren Verarbeitung
         trainingsdaten = [X_w1_ft, y_w1_ft]
         return trainingsdaten
+
+    def make_meta_dataset(self):
+
+        if self.selbstständige == "ohne":
+            # erstelle trainingsdatemsatz für meta Modell als np array
+            X_w1_meta = self.w1_training[
+                ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
+                 'beab', 'einkommen', 'besch_arbzeit']].to_numpy()
+
+        elif self.selbstständige == "nur":
+            X_w1_meta = self.w1_training[
+                ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
+                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].to_numpy()
+        y_w1_meta = self.w1_training[self.oesch].astype(int).to_numpy()
+
+
+        # Todo: hier muss ich drauf achten, dass die daten das richtige Format haben zur weiteren Verarbeitung
+        trainingsdaten = [X_w1_meta, y_w1_meta]
+        return trainingsdaten
