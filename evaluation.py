@@ -1,6 +1,12 @@
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import accuracy_score
 import numpy as np
+from sklearn.metrics import f1_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import hamming_loss
+
+
 class Evaluierer:
     def __init__(self):
         ...
@@ -18,6 +24,12 @@ class Evaluierer:
         result["validation accuracy"] = model.score(X_val, y_val)
         result["validation balanced acc"] = balanced_accuracy_score(y_val, y_val_pred)
         result["validation balanced adjusted accuracy"] = balanced_accuracy_score(y_val, y_val_pred, adjusted=True)
+
+        result["micro-f1 score"] = f1_score(y_val, y_val_pred, average='micro')
+        result["macro-f1 score"] = f1_score(y_val, y_val_pred, average='macro')
+        result["precision score"] = precision_score(y_val, y_val_pred, average='weighted')
+        result["recall score"] = recall_score(y_val, y_val_pred, average='weighted')
+        result["hamming loss"] = hamming_loss(y_val, y_val_pred)
 
         return result
 

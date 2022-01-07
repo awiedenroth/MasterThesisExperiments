@@ -19,10 +19,6 @@ if __name__ == "__main__":
     datengenerierer = Datengenerierer("oesch8","ohne")
 
     X_fasttext, y_fasttext, X_meta, y_meta = datengenerierer.make_dataset()
-    print(X_fasttext.shape)
-    print(y_fasttext.shape)
-    print(X_meta.shape)
-    print(y_meta.shape)
     #dict zum abspeichern der ergebnisse
     ergebnisse = {}
     # index um zu tracken bei welchem durchgang man ist
@@ -50,7 +46,8 @@ if __name__ == "__main__":
         meta_model = modelltrainer.train_meta(X_train_meta, y_train_meta, hyperparameter=None)
         evaluation_meta = evaluierer.make_evaluation(meta_model, X_train_meta, y_train_meta,
                                                          X_test_meta, y_test_meta)
-        print("Meta Modell: ", evaluation_meta)
+        print("Meta Modell: ")
+        pprint(evaluation_meta)
         #with open("Trained_Models/meta_8_80_n_0.pkl", "wb") as f:
         #    pickle.dump(meta_model, f)
         #json.dump(evaluation_meta, open("Ergebnisse/meta_8_80_o_0.json", 'w'))
@@ -60,7 +57,8 @@ if __name__ == "__main__":
         fasttext_model = modelltrainer.train_ft(X_train_fasttext, y_train_fasttext, hyperparameter=None)
         evaluation_fasttext = evaluierer.make_evaluation(fasttext_model, X_train_fasttext, y_train_fasttext,
                                    X_test_fasttext, y_test_fasttext)
-        print("Fasttext Modell: ", evaluation_fasttext)
+        pprint("Fasttext Modell: ")
+        pprint(evaluation_fasttext)
         #with open("Trained_Models/fasttext_8_80_n_0.pkl", "wb") as f:
             #pickle.dump(fasttext_model, f)
         #json.dump(evaluation_fasttext, open("Ergebnisse/fasttext_8_80_n_0.json", 'w'))
