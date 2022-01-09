@@ -1,4 +1,5 @@
 from presplit_datengenerierung import Datengenerierer
+from zusatzdatengenerierung import Zusatzdatengenerierer
 from modelltraining import Modelltrainer
 from evaluation import Evaluierer
 from sklearn.model_selection import KFold
@@ -7,18 +8,27 @@ import json
 import sys
 import warnings
 from pprint import pprint
+import numpy as np
 
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
+
+fasttext_zusatzdaten = True
+meta_zusatzdaten = True
+selbstständige = "ohne"
+oesch = "oesch8"
 
 
 
 if __name__ == "__main__":
     # hier muss ich angeben ob ich Oesch8 oder Oesch16 möchte und ob ich "nur" Selbstständige oder "ohne" Selbstständige haben möchte
     #Todo: hier könnte ich statt strings für oesch und selbstständige etwas eleganter Oesch=8 bzw Oesch=16 und Selbstständige = true/false machen
-    datengenerierer = Datengenerierer("oesch8","ohne")
-
+    datengenerierer = Datengenerierer(oesch,selbstständige)
+    zusatzdatengenerierer = Zusatzdatengenerierer(oesch,selbstständige)
+    # ich erzeuge für fasttext und meta jeweils die grunddaten
     X_fasttext, y_fasttext, X_meta, y_meta = datengenerierer.make_dataset()
+    # ich erzeuge die Zusatzdaten für fasttext und meta
+    X_fasttext_z, y_fasttext_z, X_meta_z, y_meta_z = zusatzdatengenerierer.make_dataset()
     #dict zum abspeichern der ergebnisse
     ergebnisse = {}
     # index um zu tracken bei welchem durchgang man ist
@@ -34,7 +44,23 @@ if __name__ == "__main__":
         # erstelle die meta modell trainings und test daten
         X_train_meta, X_test_meta = X_meta[train_index], X_meta[test_index]
         y_train_meta, y_test_meta = y_meta[train_index], y_meta[test_index]
+
         print("Anteil Trainingsdaten = ", len(X_train_fasttext), "von", len(X_fasttext))
+
+        # füge zu den trainingsdatensätzen die zusatzdaten hinzu falls gewünscht
+        if fasttext_zusatzdaten == True:
+            if selbstständige == "ohne":
+                X_train_fasttext = np.concatenate((X_train_fasttext, X_fasttext_z))
+                y_train_fasttext = np.concatenate((y_train_fasttext, y_fasttext_z))
+
+        if meta_zusatzdaten == True:
+            X_train_meta = np.concatenate((X_train_meta, X_meta_z))
+            y_train_meta = np.concatenate((y_train_meta, y_meta_z))
+
+        print("Anzahl fasttext Trainingsdaten inklusive Zusatzdaten = ", len(X_train_fasttext))
+        print("Anzahl fasttext Validierungsdaten = ", len(X_test_fasttext))
+        print("Anzahl meta Trainingsdaten inklusive Zusatzdaten = ", len(X_train_meta))
+        print("Anzahl meta Validierungsdaten = ", len(X_test_meta))
 
         #Todo: Datenaugmentierung
 
