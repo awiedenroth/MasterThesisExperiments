@@ -62,6 +62,8 @@ if __name__ == "__main__":
         print("Anzahl meta Trainingsdaten inklusive Zusatzdaten = ", len(X_train_meta))
         print("Anzahl meta Validierungsdaten = ", len(X_test_meta))
 
+        #Todo: ich muss am Ende die Daten shufflen
+
         #Todo: Datenaugmentierung
 
         # hier füge ich die anderen Metriken hinzu
@@ -89,15 +91,27 @@ if __name__ == "__main__":
             #pickle.dump(fasttext_model, f)
         #json.dump(evaluation_fasttext, open("Ergebnisse/fasttext_8_80_n_0.json", 'w'))
 
-        """print("trainiere Combi Modell")
-        train, val = datengenerierer.make_combi_dataset(fasttext_model, meta_model)
-        combi_model = modelltrainer.train_combi(train[0], train[1], hyperparameter=None)
-        evaluation_combi = evaluierer.make_evaluation(combi_model, train[0], train[1],
-                                                         val[0], val[1])
+        # erzeuge Daten für Combi model
+        fasttext_proba = fasttext_model.predict_proba(X_fasttext[train_index])
+        meta_proba = meta_model.predict_proba(X_meta[train_index])
+        X_train_combi = np.concatenate((fasttext_proba, meta_proba), axis=1)
+        y_train_combi = np.concatenate((y_meta[train_index]))
+
+        # erzeuge validierungsdaten für combi model
+        fasttext_proba_test = fasttext_model.predict_proba(X_fasttext[test_index])
+        meta_proba_test = meta_model.predict_proba(X_meta[test_index])
+        X_test_combi = np.concatenate((fasttext_proba_test, meta_proba_test), axis=1)
+        y_test_combi = np.concatenate((y_meta[test_index]))
+
+        print("trainiere Combi Modell")
+
+        combi_model = modelltrainer.train_combi(X_train_combi, y_train_combi, hyperparameter=None)
+        evaluation_combi = evaluierer.make_evaluation(combi_model, X_train_combi, y_train_combi,
+                                                         X_test_combi, y_test_combi)
         print("Combi Modell evaluation: ", evaluation_combi)
-        with open("Trained_Models/combi_8_80_n_0.pkl", "wb") as f:
-            pickle.dump(combi_model, f)
-        json.dump(evaluation_combi, open("Ergebnisse/combi_8_80_n_0.json", 'w'))"""
+        #with open("Trained_Models/combi_8_80_n_0.pkl", "wb") as f:
+           # pickle.dump(combi_model, f)
+        #json.dump(evaluation_combi, open("Ergebnisse/combi_8_80_n_0.json", 'w'))
 
 
         """for confidence in [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,0.992,0.994,0.995, 0.996, 0.997]:
@@ -107,7 +121,7 @@ if __name__ == "__main__":
             print("Combi Modell evaluation mit confidence", confidence, evaluation_combi_confidence)
             path += str(confidence) + ".json"
             json.dump(evaluation_combi_confidence, open(path, 'w'))"""
-        ergebnisse[i] = {"meta":evaluation_meta, "fasttext": evaluation_fasttext}
+        ergebnisse[i] = {"meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi}
         i = i+1
 
     json.dump(ergebnisse, open("Ergebnisse/kfold_8_ohne", 'w'))
