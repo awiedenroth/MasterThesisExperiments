@@ -9,22 +9,27 @@ import sys
 import warnings
 from pprint import pprint
 import numpy as np
+import wandb
+
 
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
-fasttext_zusatzdaten = True
-meta_zusatzdaten = True
-selbstständige = "ohne"
-oesch = "oesch8"
+configuration = {
+    "fasttext_zusatzdaten": True,
+    "meta_zusatzdaten" : True,
+    "selbstständige" : "ohne",
+    "oesch" : "oesch16"
+}
 
+wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration)
 
 
 if __name__ == "__main__":
     # hier muss ich angeben ob ich Oesch8 oder Oesch16 möchte und ob ich "nur" Selbstständige oder "ohne" Selbstständige haben möchte
     #Todo: hier könnte ich statt strings für oesch und selbstständige etwas eleganter Oesch=8 bzw Oesch=16 und Selbstständige = true/false machen
-    datengenerierer = Datengenerierer(oesch,selbstständige)
-    zusatzdatengenerierer = Zusatzdatengenerierer(oesch,selbstständige)
+    datengenerierer = Datengenerierer(configuration["oesch"],configuration["selbstständige"])
+    zusatzdatengenerierer = Zusatzdatengenerierer(configuration["oesch"],configuration["selbstständige"])
     # ich erzeuge für fasttext und meta jeweils die grunddaten
     X_fasttext, y_fasttext, X_meta, y_meta = datengenerierer.make_dataset()
     # ich erzeuge die Zusatzdaten für fasttext und meta
@@ -48,12 +53,12 @@ if __name__ == "__main__":
         print("Anteil Trainingsdaten = ", len(X_train_fasttext), "von", len(X_fasttext))
 
         # füge zu den trainingsdatensätzen die zusatzdaten hinzu falls gewünscht
-        if fasttext_zusatzdaten == True:
-            if selbstständige == "ohne":
+        if configuration["fasttext_zusatzdaten"] == True:
+            if configuration["selbstständige"] == "ohne":
                 X_train_fasttext = np.concatenate((X_train_fasttext, X_fasttext_z))
                 y_train_fasttext = np.concatenate((y_train_fasttext, y_fasttext_z))
 
-        if meta_zusatzdaten == True:
+        if configuration["meta_zusatzdaten"] == True:
             X_train_meta = np.concatenate((X_train_meta, X_meta_z))
             y_train_meta = np.concatenate((y_train_meta, y_meta_z))
 
@@ -122,7 +127,10 @@ if __name__ == "__main__":
             path += str(confidence) + ".json"
             json.dump(evaluation_combi_confidence, open(path, 'w'))"""
         ergebnisse[i] = {"meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi}
+        wandb.log({"cross validation Durchgang": i, "meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi})
         i = i+1
 
-    json.dump(ergebnisse, open("Ergebnisse/kfold_8_ohne", 'w'))
+
+
+    json.dump(ergebnisse, open("Ergebnisse/kfold_16_ohne", 'w'))
     pprint(ergebnisse)
