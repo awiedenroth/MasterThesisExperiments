@@ -2,6 +2,7 @@ from presplit_datengenerierung import Datengenerierer
 from zusatzdatengenerierung import Zusatzdatengenerierer
 from modelltraining import Modelltrainer
 from evaluation import Evaluierer
+from datenaugementierung import Augmentierer
 from sklearn.model_selection import KFold
 import pickle
 import json
@@ -10,6 +11,7 @@ import warnings
 from pprint import pprint
 import numpy as np
 import wandb
+import pandas as pd
 
 
 if not sys.warnoptions:
@@ -31,32 +33,33 @@ if __name__ == "__main__":
     datengenerierer = Datengenerierer(configuration["oesch"],configuration["selbstständige"])
     zusatzdatengenerierer = Zusatzdatengenerierer(configuration["oesch"],configuration["selbstständige"])
     # ich erzeuge für fasttext und meta jeweils die grunddaten
-    X_fasttext, y_fasttext, X_meta, y_meta = datengenerierer.make_dataset()
+    fasttext_df, X_meta, y_meta = datengenerierer.make_dataset()
     # ich erzeuge die Zusatzdaten für fasttext und meta
-    X_fasttext_z, y_fasttext_z, X_meta_z, y_meta_z = zusatzdatengenerierer.make_dataset()
+    fasttext_wb_df, X_meta_z, y_meta_z = zusatzdatengenerierer.make_dataset()
     #dict zum abspeichern der ergebnisse
     ergebnisse = {}
     # index um zu tracken bei welchem durchgang man ist
     i = 0
     kf = KFold(n_splits=8)
     # die for schleife geht k mal durch
-    for train_index, test_index in kf.split(X_fasttext):
+    for train_index, test_index in kf.split(fasttext_df):
         print("Durchgang ", i)
 
         # erstelle die fasttext trainings und test daten
-        X_train_fasttext, X_test_fasttext = X_fasttext[train_index], X_fasttext[test_index]
-        y_train_fasttext, y_test_fasttext = y_fasttext.iloc[train_index], y_fasttext.iloc[test_index]
+        X_train_fasttext, X_test_fasttext = fasttext_df.iloc[[train_index]], fasttext_df.iloc[test_index]
+        #y_train_fasttext, y_test_fasttext = y_fasttext.iloc[train_index], y_fasttext.iloc[test_index]
         # erstelle die meta modell trainings und test daten
         X_train_meta, X_test_meta = X_meta[train_index], X_meta[test_index]
         y_train_meta, y_test_meta = y_meta[train_index], y_meta[test_index]
 
-        print("Anteil Trainingsdaten = ", len(X_train_fasttext), "von", len(X_fasttext))
+        print("Anteil Trainingsdaten = ", len(X_train_fasttext), "von", len(fasttext_df))
 
         # füge zu den trainingsdatensätzen die zusatzdaten hinzu falls gewünscht
         if configuration["fasttext_zusatzdaten"] == True:
             if configuration["selbstständige"] == "ohne":
-                X_train_fasttext = np.concatenate((X_train_fasttext, X_fasttext_z))
-                y_train_fasttext = np.concatenate((y_train_fasttext, y_fasttext_z))
+                #X_train_fasttext = np.concatenate((X_train_fasttext, X_fasttext_z))
+                #y_train_fasttext = np.concatenate((y_train_fasttext, y_fasttext_z))
+                X_train_fasttext = pd.concat(X_train_fasttext, fasttext_wb_df)
 
         if configuration["meta_zusatzdaten"] == True:
             X_train_meta = np.concatenate((X_train_meta, X_meta_z))
@@ -67,9 +70,11 @@ if __name__ == "__main__":
         print("Anzahl meta Trainingsdaten inklusive Zusatzdaten = ", len(X_train_meta))
         print("Anzahl meta Validierungsdaten = ", len(X_test_meta))
 
+        # Todo: Datenaugmentierung
+        #augmentierer = Augmentierer(X_train_fasttext, y_train_fasttext, X_train_meta, y_train_meta, lowercase=True)
+        #X_train_fasttext, y_train_fasttext, X_train_meta, y_train_meta = augmentierer.augment_data()
         #Todo: ich muss am Ende die Daten shufflen
 
-        #Todo: Datenaugmentierung
 
         # hier füge ich die anderen Metriken hinzu
         modelltrainer = Modelltrainer(0, "merror")

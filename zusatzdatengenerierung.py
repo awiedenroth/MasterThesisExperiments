@@ -116,17 +116,20 @@ class Zusatzdatengenerierer:
 
             # generiere Trainingsdatensatz mit embeddings und oesch16
 
-            X_wb = Wörterbuch_de["embeddings"].values
-            y_wb = Wörterbuch_de[self.oesch].values.astype(int)
+            fasttext_wb_df = Wörterbuch_de[["berufsbezeichnung", "embeddings", self.oesch]].copy()
+            fasttext_wb_df = fasttext_wb_df.rename(columns={'berufsbezeichung': 'taetigk'})
 
-            X_wb = np.vstack((X_wb[i] for i in range(len(X_wb))))
+            #X_wb = Wörterbuch_de["embeddings"].values
+            #y_wb = Wörterbuch_de[self.oesch].values.astype(int)
+
+            #X_wb = np.vstack((X_wb[i] for i in range(len(X_wb))))
 
             # Datensatz X_wb, y_wb besteht aus einer Matrix X_wb mit der Anzahl der Wörterbucheinträge als zeilen, und 300 spalten
             # die zeilen stehen für Datenpunkte, die spalten enthalten den 300 dimensionalen Fasttext embedding vektor
         else:
-            X_wb = None
-            y_wb = None
+             fasttext_wb_df = None
 
-        return X_wb, y_wb, X_meta, y_meta
+
+        return fasttext_wb_df, X_meta, y_meta
 
 

@@ -76,10 +76,12 @@ class Datengenerierer:
         # shuffle trainingsdatensatz
         #w1_training_ft = w1_training_ft.sample(frac=1, random_state=self.random_state)
         # generiere X und y
-        X_w1_ft = w1_training_ft["embeddings"].values
-        y_w1_ft = w1_training_ft[self.oesch].astype(int)
+        # todo: hier sollte ich einfach w1_training_ft komplett zurück geben, bzw die Spalten taetigk, embeddings, oesch
+        trainingsdaten_ft = w1_training_ft[["taetigk","embeddings", self.oesch]].copy()
+        #X_w1_ft = w1_training_ft["embeddings"].values
+        #y_w1_ft = w1_training_ft[self.oesch].astype(int)
         # mache matrix aus den Trainingsdaten
-        X_w1_ft = np.vstack((X_w1_ft[i] for i in range(len(X_w1_ft))))
+        #X_w1_ft = np.vstack((X_w1_ft[i] for i in range(len(X_w1_ft))))
 
         if self.selbstständige == "ohne":
             # erstelle trainingsdatemsatz für meta Modell als np array
@@ -93,8 +95,8 @@ class Datengenerierer:
                  'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].to_numpy()
         y_w1_meta = self.w1_training[self.oesch].astype(int).to_numpy()
 
-        # ich gebe zurück: fasttext daten, fasttext labels, meta daten, meta_labels
-        return  X_w1_ft, y_w1_ft, X_w1_meta, y_w1_meta
+        # ich gebe zurück: fasttext trainingsdaten mit "taetigk", "embeddings", self.oesch, meta daten, meta_labels
+        return  trainingsdaten_ft, X_w1_meta, y_w1_meta
 
 # Todo: das sollte vermutlich eine eigene Klasse sein
     def make_combi_dataset(self, ft_model, meta_model):
