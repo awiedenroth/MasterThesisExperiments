@@ -1,3 +1,5 @@
+from typing import Union, Dict, Any
+
 from presplit_datengenerierung import Datengenerierer
 from zusatzdatengenerierung import Zusatzdatengenerierer
 from modelltraining import Modelltrainer
@@ -12,7 +14,9 @@ from pprint import pprint
 import numpy as np
 import wandb
 import pandas as pd
+from joblib import Memory
 
+mem = Memory("./cache")
 
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
@@ -26,16 +30,28 @@ configuration = {
 
 wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration)
 
-
-if __name__ == "__main__":
-    # hier muss ich angeben ob ich Oesch8 oder Oesch16 möchte und ob ich "nur" Selbstständige oder "ohne" Selbstständige haben möchte
-    #Todo: hier könnte ich statt strings für oesch und selbstständige etwas eleganter Oesch=8 bzw Oesch=16 und Selbstständige = true/false machen
-    datengenerierer = Datengenerierer(configuration["oesch"],configuration["selbstständige"])
-    zusatzdatengenerierer = Zusatzdatengenerierer(configuration["oesch"],configuration["selbstständige"])
+# caching funktion zur Datensatzerstellung
+@mem.cache
+def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
+    datengenerierer = Datengenerierer(configuration["oesch"], configuration["selbstständige"])
+    zusatzdatengenerierer = Zusatzdatengenerierer(configuration["oesch"], configuration["selbstständige"])
     # ich erzeuge für fasttext und meta jeweils die grunddaten
     fasttext_df, X_meta, y_meta = datengenerierer.make_dataset()
     # ich erzeuge die Zusatzdaten für fasttext und meta
     fasttext_wb_df, X_meta_z, y_meta_z = zusatzdatengenerierer.make_dataset()
+
+    return fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z
+
+if __name__ == "__main__":
+    # hier muss ich angeben ob ich Oesch8 oder Oesch16 möchte und ob ich "nur" Selbstständige oder "ohne" Selbstständige haben möchte
+    #Todo: hier könnte ich statt strings für oesch und selbstständige etwas eleganter Oesch=8 bzw Oesch=16 und Selbstständige = true/false machen
+    """datengenerierer = Datengenerierer(configuration["oesch"],configuration["selbstständige"])
+    zusatzdatengenerierer = Zusatzdatengenerierer(configuration["oesch"],configuration["selbstständige"])
+    # ich erzeuge für fasttext und meta jeweils die grunddaten
+    fasttext_df, X_meta, y_meta = datengenerierer.make_dataset()
+    # ich erzeuge die Zusatzdaten für fasttext und meta
+    fasttext_wb_df, X_meta_z, y_meta_z = zusatzdatengenerierer.make_dataset()"""
+    fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
     #dict zum abspeichern der ergebnisse
     ergebnisse = {}
     # index um zu tracken bei welchem durchgang man ist
