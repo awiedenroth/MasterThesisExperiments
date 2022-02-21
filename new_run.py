@@ -62,7 +62,7 @@ if __name__ == "__main__":
         print("Durchgang ", i)
 
         # erstelle die fasttext trainings und test daten
-        X_train_fasttext, X_test_fasttext = fasttext_df.iloc[[train_index]], fasttext_df.iloc[test_index]
+        X_train_fasttext, X_test_fasttext = fasttext_df.iloc[train_index], fasttext_df.iloc[test_index]
         #y_train_fasttext, y_test_fasttext = y_fasttext.iloc[train_index], y_fasttext.iloc[test_index]
         # erstelle die meta modell trainings und test daten
         X_train_meta, X_test_meta = X_meta[train_index], X_meta[test_index]
@@ -75,7 +75,7 @@ if __name__ == "__main__":
             if configuration["selbstständige"] == "ohne":
                 #X_train_fasttext = np.concatenate((X_train_fasttext, X_fasttext_z))
                 #y_train_fasttext = np.concatenate((y_train_fasttext, y_fasttext_z))
-                X_train_fasttext = pd.concat(X_train_fasttext, fasttext_wb_df)
+                X_train_fasttext = pd.concat([X_train_fasttext, fasttext_wb_df])
 
         if configuration["meta_zusatzdaten"] == True:
             X_train_meta = np.concatenate((X_train_meta, X_meta_z))
