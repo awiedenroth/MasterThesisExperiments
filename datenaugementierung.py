@@ -29,8 +29,8 @@ class Augmentierer:
         # identischen label den neuen Datenpunkt hinzu
         # Erinnerung: wir iterieren nicht durch df, sondern wenden funktion an auf alle zeilen
 
-        def modify_string(self):
-            
+        #def modify_string(self):
+
 
 
         if self.lowercase:
@@ -40,3 +40,21 @@ class Augmentierer:
             ft_data_2 = pd.concat([ft_training_lower, deepcopy(self.fasttext_df)])
 
         return self.X_ft, self.y_ft
+
+def lowercase(string:str) -> str:
+    return string.lower()
+
+def remove_stopwords(string:str) -> str:
+    ...
+
+def remove_numbers(string:str) -> str:
+    ...
+
+def remove_punctuation(string:str) -> str:
+    ...
+
+def keyboard_augmentation(string:str) -> str:
+    ...
+
+def synonym_augmentation(string:str) -> str:
+    ...
