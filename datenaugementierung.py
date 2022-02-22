@@ -17,21 +17,26 @@ def missing_val(x):
 # zusammen gehören ganz am Ende, wie kann ich das tun???
 class Augmentierer:
 
-    def __init__(self, X_ft, y_ft, X_meta, y_meta, lowercase:bool):
+    def __init__(self, fasttext_df, configuration):
 
-        self.X_ft = X_ft
-        self.y_ft = y_ft
-        self.X_meta = X_meta
-        self.y_meta = y_meta
-        self.lowercase = lowercase
+        self.fasttext_df = fasttext_df
+        self.config = configuration
 
 
     def augment_data(self):
+        # fasttext_df ist ein df mit 3 Spalten: "taetigk","embeddings", self.oesch
+        # hier nehmen wir nun die spalte taetigk, modifizieren sie, leiten daraus embeddings ab und fügen dann mit dem
+        # identischen label den neuen Datenpunkt hinzu
+        # Erinnerung: wir iterieren nicht durch df, sondern wenden funktion an auf alle zeilen
+
+        def modify_string(self):
+            
+
 
         if self.lowercase:
             # erstelle trainingsdatensatz für Fasttext Modell, indem alle Zeilen verdoppelt werden einmal mit .lower()
-            ft_training_lower = deepcopy(self.X_ft)
+            ft_training_lower = deepcopy(self.fasttext_df)
             ft_training_lower["taetigk"] = ft_training_lower["taetigk"].apply(lambda x: x.lower())
-            ft_data_2 = pd.concat([ft_training_lower, deepcopy(self.X_ft)])
+            ft_data_2 = pd.concat([ft_training_lower, deepcopy(self.fasttext_df)])
 
-        return self.X_ft, self.y_ft, self.X_meta, self.y_meta
+        return self.X_ft, self.y_ft

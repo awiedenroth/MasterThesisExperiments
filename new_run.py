@@ -87,8 +87,8 @@ if __name__ == "__main__":
         print("Anzahl meta Validierungsdaten = ", len(X_test_meta))
 
         # Todo: Datenaugmentierung
-        #augmentierer = Augmentierer(X_train_fasttext, y_train_fasttext, X_train_meta, y_train_meta, lowercase=True)
-        #X_train_fasttext, y_train_fasttext, X_train_meta, y_train_meta = augmentierer.augment_data()
+        augmentierer = Augmentierer(X_train_fasttext, configuration)
+        #X_train_fasttext, y_train_fasttext= augmentierer.augment_data()
         #Todo: ich muss am Ende die Daten shufflen
 
 
