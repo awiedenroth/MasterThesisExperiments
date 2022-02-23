@@ -45,7 +45,7 @@ def lowercase(string:str) -> str:
     return string.lower()
 
 def remove_stopwords(string:str) -> str:
-    ...
+    return [w for w in string if w not in stopwordList]
 
 def remove_numbers(string:str) -> str:
     ...
