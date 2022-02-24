@@ -13,9 +13,6 @@ import nlpaug.augmenter.word as naw
 import nlpaug.augmenter.sentence as nas
 
 
-nltk.download('stopwords')
-
-
 
 ft = fasttext.load_model('cc.de.300.bin')
 
@@ -53,23 +50,12 @@ class Augmentierer:
 
         return self.X_ft, self.y_ft
 
-    def lowercase(string:str) -> str:
-        return string.lower()
 
-    def remove_stopwords(string:str) -> str:
-        stopWords = set(stopwords.words('german'))
-        tokenized = word_tokenize(string)
-        clean = [w for w in tokenized if w not in stopWords]
-        return TreebankWordDetokenizer().detokenize([w for w in tokenized if w not in stopWords])
 
-    def remove_numbers(string:str) -> str:
-        ...
 
-    def remove_punctuation(string:str) -> str:
-        ...
 
     def keyboard_augmentation(string:str) -> str:
-        aug = nac.KeyboardAug()
+        aug = nac.KeyboardAug(aug_char_max=1, lang= "de")
         augmented_text = aug.augment(string)
         #print("Original:")
         #print(string)
@@ -77,5 +63,5 @@ class Augmentierer:
         #print(augmented_text)
         return augmented_text
 
-    def synonym_augmentation(string:str) -> str:
-        ...
+    #def synonym_augmentation(string:str) -> str:
+      #  ...
