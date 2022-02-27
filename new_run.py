@@ -2,6 +2,7 @@ from typing import Union, Dict, Any
 
 from presplit_datengenerierung import Datengenerierer
 from zusatzdatengenerierung import Zusatzdatengenerierer
+from data_cleaning import clean_data
 from modelltraining import Modelltrainer
 from evaluation import Evaluierer
 from datenaugementierung import Augmentierer
@@ -52,6 +53,10 @@ if __name__ == "__main__":
     # ich erzeuge die Zusatzdaten für fasttext und meta
     fasttext_wb_df, X_meta_z, y_meta_z = zusatzdatengenerierer.make_dataset()"""
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
+
+    # todo: fasttext_df und fasttext_wb_df durch die cleaning procedure schicken
+    fasttext_df = clean_data(fasttext_df, configuration)
+    fasttext_wb_df = clean_data(fasttext_wb_df, configuration)
     #dict zum abspeichern der ergebnisse
     ergebnisse = {}
     # index um zu tracken bei welchem durchgang man ist
@@ -86,10 +91,11 @@ if __name__ == "__main__":
         print("Anzahl meta Trainingsdaten inklusive Zusatzdaten = ", len(X_train_meta))
         print("Anzahl meta Validierungsdaten = ", len(X_test_meta))
 
-        # Todo: Datenaugmentierung
         augmentierer = Augmentierer(X_train_fasttext, configuration)
-        #X_train_fasttext, y_train_fasttext= augmentierer.augment_data()
+        X_train_fasttext = augmentierer.augment_data()
         #Todo: ich muss am Ende die Daten shufflen
+
+        #Todo: ich erzeuge aus training_df und test_df die embeddings bei den fasttext dingen und shuffle
 
 
         # hier füge ich die anderen Metriken hinzu

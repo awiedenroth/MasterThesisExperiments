@@ -14,7 +14,7 @@ import nlpaug.augmenter.sentence as nas
 
 
 
-ft = fasttext.load_model('cc.de.300.bin')
+#ft = fasttext.load_model('cc.de.300.bin')
 
 
 def missing_val(x):
@@ -33,26 +33,20 @@ class Augmentierer:
 
 
     def augment_data(self):
+        if self.config["keyboard_aug"] == True:
+            augmented_df = self.fasttext_df.deepcopy()
+            augmented_df["taetigk"] = augmented_df["taetigk"].apply(self.keyboard_augmentation())
+            #augmented_df["embeddings"] = augmented_df["taetigk"].apply(ft.get_word_vector)
+            self.fasttext_df = pd.concat([self.fasttext_df, augmented_df])
+
+        return self.fasttext_df
+
         # fasttext_df ist ein df mit 3 Spalten: "taetigk","embeddings", self.oesch
         # hier nehmen wir nun die spalte taetigk, modifizieren sie, leiten daraus embeddings ab und fügen dann mit dem
         # identischen label den neuen Datenpunkt hinzu
         # Erinnerung: wir iterieren nicht durch df, sondern wenden funktion an auf alle zeilen
 
         #def modify_string(self):
-
-
-
-        if self.lowercase:
-            # erstelle trainingsdatensatz für Fasttext Modell, indem alle Zeilen verdoppelt werden einmal mit .lower()
-            ft_training_lower = deepcopy(self.fasttext_df)
-            ft_training_lower["taetigk"] = ft_training_lower["taetigk"].apply(lambda x: x.lower())
-            ft_data_2 = pd.concat([ft_training_lower, deepcopy(self.fasttext_df)])
-
-        return self.X_ft, self.y_ft
-
-
-
-
 
     def keyboard_augmentation(string:str) -> str:
         aug = nac.KeyboardAug(aug_char_max=1, lang= "de")

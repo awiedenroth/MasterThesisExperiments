@@ -5,7 +5,7 @@ from copy import deepcopy
 import fastText as fasttext
 import fasttext.util
 
-ft = fasttext.load_model('cc.de.300.bin')
+#ft = fasttext.load_model('cc.de.300.bin')
 
 
 def missing_val(x):
@@ -102,7 +102,7 @@ class Zusatzdatengenerierer:
 
 
         if self.selbstständige == "ohne":
-            ft = fasttext.load_model('cc.de.300.bin')
+            #ft = fasttext.load_model('cc.de.300.bin')
             # Wörterbuch_de als Trainingsdatensatz für Fasttext, ohne Selbstständige
 
             path = Path("./Wörterbücher/wic_wörterbuch_aufbereitet_oesch.csv")
@@ -112,11 +112,11 @@ class Zusatzdatengenerierer:
             # hier könnte man data-augmentation machen indem man lowercase hinzufügt
 
             # füge Spalte mit Embeddings hinzu
-            Wörterbuch_de["embeddings"] = Wörterbuch_de["berufsbezeichnung"].apply(ft.get_word_vector)
+            #Wörterbuch_de["embeddings"] = Wörterbuch_de["berufsbezeichnung"].apply(ft.get_word_vector)
 
             # generiere Trainingsdatensatz mit embeddings und oesch16
 
-            fasttext_wb_df = Wörterbuch_de[["berufsbezeichnung", "embeddings", self.oesch]].copy()
+            fasttext_wb_df = Wörterbuch_de[["berufsbezeichnung", self.oesch]].copy()
             fasttext_wb_df = fasttext_wb_df.rename(columns={'berufsbezeichung': 'taetigk'})
 
             #X_wb = Wörterbuch_de["embeddings"].values

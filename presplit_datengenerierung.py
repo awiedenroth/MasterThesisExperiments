@@ -5,7 +5,7 @@ from copy import deepcopy
 import fastText as fasttext
 import fasttext.util
 
-ft = fasttext.load_model('cc.de.300.bin')
+#ft = fasttext.load_model('cc.de.300.bin')
 
 
 def missing_val(x):
@@ -68,16 +68,16 @@ class Datengenerierer:
     # Hier erstelle ich den Grund-Datensatz für das Fasttext Modell, indem ich die embeddings und die Oesch Werte extrahiere
     def make_dataset(self):
 
-        ft = fasttext.load_model('cc.de.300.bin')
+        #ft = fasttext.load_model('cc.de.300.bin')
 
         # füge bei Fasttext Trainingsdatensatz embeddings hinzu
         w1_training_ft = deepcopy(self.w1_training)
-        w1_training_ft["embeddings"] = w1_training_ft["taetigk"].apply(ft.get_word_vector)
+        #w1_training_ft["embeddings"] = w1_training_ft["taetigk"].apply(ft.get_word_vector)
         # shuffle trainingsdatensatz
         #w1_training_ft = w1_training_ft.sample(frac=1, random_state=self.random_state)
         # generiere X und y
         # todo: hier sollte ich einfach w1_training_ft komplett zurück geben, bzw die Spalten taetigk, embeddings, oesch
-        trainingsdaten_ft = w1_training_ft[["taetigk","embeddings", self.oesch]].copy()
+        trainingsdaten_ft = w1_training_ft[["taetigk", self.oesch]].copy()
         #X_w1_ft = w1_training_ft["embeddings"].values
         #y_w1_ft = w1_training_ft[self.oesch].astype(int)
         # mache matrix aus den Trainingsdaten
