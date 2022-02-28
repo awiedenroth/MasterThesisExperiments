@@ -26,7 +26,11 @@ configuration = {
     "fasttext_zusatzdaten": True,
     "meta_zusatzdaten" : True,
     "selbstständige" : "ohne",
-    "oesch" : "oesch16"
+    "oesch" : "oesch16",
+    "lowercase" : True,
+    "remove_stopwords": True,
+    "remove_numbers": False,
+    "remove_punctuation": False
 }
 
 wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration)

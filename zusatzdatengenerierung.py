@@ -117,7 +117,7 @@ class Zusatzdatengenerierer:
             # generiere Trainingsdatensatz mit embeddings und oesch16
 
             fasttext_wb_df = Wörterbuch_de[["berufsbezeichnung", self.oesch]].copy()
-            fasttext_wb_df = fasttext_wb_df.rename(columns={'berufsbezeichung': 'taetigk'})
+            fasttext_wb_df = fasttext_wb_df.rename(columns={'berufsbezeichnung': 'taetigk'})
 
             #X_wb = Wörterbuch_de["embeddings"].values
             #y_wb = Wörterbuch_de[self.oesch].values.astype(int)
