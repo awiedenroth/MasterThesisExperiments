@@ -34,8 +34,8 @@ class Augmentierer:
 
     def augment_data(self):
         if self.config["keyboard_aug"] == True:
-            augmented_df = self.fasttext_df.deepcopy()
-            augmented_df["taetigk"] = augmented_df["taetigk"].apply(self.keyboard_augmentation())
+            augmented_df = self.fasttext_df.copy()
+            augmented_df["taetigk"] = augmented_df["taetigk"].apply(lambda x: self.keyboard_augmentation(x))
             #augmented_df["embeddings"] = augmented_df["taetigk"].apply(ft.get_word_vector)
             self.fasttext_df = pd.concat([self.fasttext_df, augmented_df])
 
@@ -48,7 +48,7 @@ class Augmentierer:
 
         #def modify_string(self):
 
-    def keyboard_augmentation(string:str) -> str:
+    def keyboard_augmentation(x, string:str) -> str:
         aug = nac.KeyboardAug(aug_char_max=1, lang= "de")
         augmented_text = aug.augment(string)
         #print("Original:")

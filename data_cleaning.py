@@ -11,12 +11,13 @@ from nltk.tokenize.treebank import TreebankWordDetokenizer
 import nlpaug.augmenter.char as nac
 import nlpaug.augmenter.word as naw
 import nlpaug.augmenter.sentence as nas
+from caching import mem
 
 nltk.download('stopwords')
 
 # alle daten werden cleaned auch die validierungsdaten, das muss man dann immer machen
 
-
+@mem.cache
 def clean_data(fasttext_df, config):
 
     if config["lowercase"] == True:

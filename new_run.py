@@ -2,10 +2,12 @@ from typing import Union, Dict, Any
 
 from presplit_datengenerierung import Datengenerierer
 from zusatzdatengenerierung import Zusatzdatengenerierer
+from sklearn.model_selection import train_test_split
 from data_cleaning import clean_data
 from modelltraining import Modelltrainer
 from evaluation import Evaluierer
 from datenaugementierung import Augmentierer
+from finalize_dataset import Data_finalizer
 from sklearn.model_selection import KFold
 import pickle
 import json
@@ -15,9 +17,7 @@ from pprint import pprint
 import numpy as np
 import wandb
 import pandas as pd
-from joblib import Memory
-
-mem = Memory("./cache")
+from caching import mem
 
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
@@ -30,7 +30,9 @@ configuration = {
     "lowercase" : True,
     "remove_stopwords": True,
     "remove_numbers": False,
-    "remove_punctuation": False
+    "remove_punctuation": False,
+    "keyboard_aug" : True,
+    "random_seed": 42
 }
 
 wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration)
@@ -58,7 +60,6 @@ if __name__ == "__main__":
     fasttext_wb_df, X_meta_z, y_meta_z = zusatzdatengenerierer.make_dataset()"""
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
 
-    # todo: fasttext_df und fasttext_wb_df durch die cleaning procedure schicken
     fasttext_df = clean_data(fasttext_df, configuration)
     fasttext_wb_df = clean_data(fasttext_wb_df, configuration)
     #dict zum abspeichern der ergebnisse
@@ -97,9 +98,12 @@ if __name__ == "__main__":
 
         augmentierer = Augmentierer(X_train_fasttext, configuration)
         X_train_fasttext = augmentierer.augment_data()
-        #Todo: ich muss am Ende die Daten shufflen
 
         #Todo: ich erzeuge aus training_df und test_df die embeddings bei den fasttext dingen und shuffle
+        finalizer = Data_finalizer(configuration)
+        X_train_fasttext, y_train_fasttext = finalizer.finalize_data(X_train_fasttext)
+        X_test_fasttext, y_test_fasttext = finalizer.finalize_data(X_test_fasttext)
+
 
 
         # hier füge ich die anderen Metriken hinzu
