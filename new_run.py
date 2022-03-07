@@ -6,8 +6,8 @@ from sklearn.model_selection import train_test_split
 from data_cleaning import clean_data
 from modelltraining import Modelltrainer
 from evaluation import Evaluierer
-from datenaugementierung import Augmentierer
-from finalize_dataset import Data_finalizer
+from datenaugementierung import augment_data
+from finalize_dataset import finalize_data
 from sklearn.model_selection import KFold
 import pickle
 import json
@@ -96,13 +96,11 @@ if __name__ == "__main__":
         print("Anzahl meta Trainingsdaten inklusive Zusatzdaten = ", len(X_train_meta))
         print("Anzahl meta Validierungsdaten = ", len(X_test_meta))
 
-        augmentierer = Augmentierer(X_train_fasttext, configuration)
-        X_train_fasttext = augmentierer.augment_data()
+        X_train_fasttext = augment_data(X_train_fasttext, configuration)
 
-        #Todo: ich erzeuge aus training_df und test_df die embeddings bei den fasttext dingen und shuffle
-        finalizer = Data_finalizer(configuration)
-        X_train_fasttext, y_train_fasttext = finalizer.finalize_data(X_train_fasttext)
-        X_test_fasttext, y_test_fasttext = finalizer.finalize_data(X_test_fasttext)
+        # ich erzeuge aus training_df und test_df die embeddings bei den fasttext dingen und shuffle
+        X_train_fasttext, y_train_fasttext = finalize_data(X_train_fasttext, configuration)
+        X_test_fasttext, y_test_fasttext = finalize_data(X_test_fasttext, configuration)
 
 
 
