@@ -8,8 +8,8 @@ from caching import mem
 # dann nehme ich embeddings und labels, shuffle und erstelle datensatz daraus
 
 @mem.cache
-def finalize_data(self, df, config):
-    df["embeddings"] = df["taetigk"].apply(self.ft.get_word_vector)
+def finalize_data(df, config):
+    df["embeddings"] = df["taetigk"].apply(ft.get_word_vector)
     # shuffle Datensatz
     df = df.sample(frac=1, random_state= config["random_seed"])
     # generiere X und y

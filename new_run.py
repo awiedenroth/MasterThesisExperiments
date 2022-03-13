@@ -23,10 +23,10 @@ if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 configuration = {
-    "fasttext_zusatzdaten": True,
-    "meta_zusatzdaten" : True,
-    "selbstständige" : "ohne",
-    "oesch" : "oesch16",
+    "fasttext_zusatzdaten": False,
+    "meta_zusatzdaten" : False,
+    "selbstständige" : "nur",
+    "oesch" : "oesch8",
     "lowercase" : True,
     "remove_stopwords": True,
     "remove_numbers": False,
@@ -61,7 +61,8 @@ if __name__ == "__main__":
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
 
     fasttext_df = clean_data(fasttext_df, configuration)
-    fasttext_wb_df = clean_data(fasttext_wb_df, configuration)
+    if configuration["fasttext_zusatzdaten"] == True:
+        fasttext_wb_df = clean_data(fasttext_wb_df, configuration)
     #dict zum abspeichern der ergebnisse
     ergebnisse = {}
     # index um zu tracken bei welchem durchgang man ist
@@ -167,5 +168,5 @@ if __name__ == "__main__":
 
 
 
-    json.dump(ergebnisse, open("Ergebnisse/kfold_16_ohne", 'w'))
+    json.dump(ergebnisse, open("Ergebnisse/kfold_8_nur", 'w'))
     pprint(ergebnisse)

@@ -30,7 +30,8 @@ def augment_data(df, config):
 
     #def modify_string(self):
 
-def keyboard_augmentation(x, string:str) -> str:
+# Achtung: diese Funktion ist random, und es ist nicht möglich den seed zu setzen!!
+def keyboard_augmentation(string:str) -> str:
     aug = nac.KeyboardAug(aug_char_max=1, lang= "de")
     augmented_text = aug.augment(string)
     #print("Original:")
