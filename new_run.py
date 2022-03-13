@@ -129,15 +129,17 @@ if __name__ == "__main__":
             #pickle.dump(fasttext_model, f)
         #json.dump(evaluation_fasttext, open("Ergebnisse/fasttext_8_80_n_0.json", 'w'))
 
+        #Todo: combimodell zum laufen bringen
         # erzeuge Daten für Combi model
-        fasttext_proba = fasttext_model.predict_proba(X_fasttext[train_index])
-        meta_proba = meta_model.predict_proba(X_meta[train_index])
+        fasttext_proba = fasttext_model.predict_proba(X_train_fasttext)
+        meta_proba = meta_model.predict_proba(X_train_meta)
         X_train_combi = np.concatenate((fasttext_proba, meta_proba), axis=1)
         y_train_combi = (y_meta[train_index])
 
+
         # erzeuge validierungsdaten für combi model
-        fasttext_proba_test = fasttext_model.predict_proba(X_fasttext[test_index])
-        meta_proba_test = meta_model.predict_proba(X_meta[test_index])
+        fasttext_proba_test = fasttext_model.predict_proba(X_test_fasttext)
+        meta_proba_test = meta_model.predict_proba(X_test_meta)
         X_test_combi = np.concatenate((fasttext_proba_test, meta_proba_test), axis=1)
         y_test_combi = (y_meta[test_index])
 
