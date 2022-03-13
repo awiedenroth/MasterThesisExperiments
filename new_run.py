@@ -110,6 +110,7 @@ if __name__ == "__main__":
         evaluierer = Evaluierer()
 
         print("trainiere meta Modell")
+        # Todo: was zur fucking hölle ist hier los?!? es sagt immer "Wrong number of arguments for train_meta(self, X, y, hyperparameter):"
         meta_model = modelltrainer.train_meta(X_train_meta, y_train_meta, hyperparameter=None)
         evaluation_meta = evaluierer.make_evaluation(meta_model, X_train_meta, y_train_meta,
                                                          X_test_meta, y_test_meta)
