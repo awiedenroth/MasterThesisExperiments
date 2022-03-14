@@ -3,6 +3,7 @@ from typing import Union, Dict, Any
 from presplit_datengenerierung import Datengenerierer
 from zusatzdatengenerierung import Zusatzdatengenerierer
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 from data_cleaning import clean_data
 from modelltraining import train_ft
 from modelltraining import train_meta
@@ -31,8 +32,8 @@ configuration = {
     "oesch" : "oesch8",
     "lowercase" : True,
     "remove_stopwords": True,
-    "remove_numbers": False,
-    "remove_punctuation": False,
+    "remove_numbers": True,
+    "remove_punctuation": True,
     "keyboard_aug" : True,
     "random_seed": 42
 }
@@ -105,7 +106,9 @@ if __name__ == "__main__":
         X_train_fasttext, y_train_fasttext = finalize_data(X_train_fasttext, configuration, shuffle = True)
         X_test_fasttext, y_test_fasttext = finalize_data(X_test_fasttext, configuration, shuffle = True)
 
-        #todo: ich muss meta datan auch shufflen! muss ich sie garnicht augmentieren?
+        # Meta daten werden geshufflet
+        X_train_meta, y_train_meta = shuffle(X_train_meta, y_train_meta)
+        X_test_meta, y_test_meta = shuffle(X_test_meta, y_test_meta)
 
 
         # hier füge ich die anderen Metriken hinzu
@@ -133,14 +136,14 @@ if __name__ == "__main__":
             #pickle.dump(fasttext_model, f)
         #json.dump(evaluation_fasttext, open("Ergebnisse/fasttext_8_80_n_0.json", 'w'))
 
-        #Todo: combimodell zum laufen bringen
+
         # erzeuge Daten für Combi model
 
         fasttext_raw_train, y_train_combi = finalize_data(fasttext_df.iloc[train_index], configuration, shuffle=False)
         fasttext_proba = fasttext_model.predict_proba(fasttext_raw_train)
         meta_proba = meta_model.predict_proba(X_meta[train_index])
         X_train_combi = np.concatenate((fasttext_proba, meta_proba), axis=1)
-        #y_train_combi = (y_meta[train_index])
+        # todo: muss ich noch shufflen!
 
 
         # erzeuge validierungsdaten für combi model
@@ -148,6 +151,7 @@ if __name__ == "__main__":
         fasttext_proba_test = fasttext_model.predict_proba(fasttext_raw_test)
         meta_proba_test = meta_model.predict_proba(X_meta[test_index])
         X_test_combi = np.concatenate((fasttext_proba_test, meta_proba_test), axis=1)
+        # todo: muss ich noch shufflen!
 
         print("trainiere Combi Modell")
 

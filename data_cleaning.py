@@ -51,7 +51,7 @@ def remove_numbers(text:str) -> str:
     return words_wo_num
 
 def remove_punctuation(text):
-    no_punct=[words for words in text if words not in string.punctation or words == "-"]
+    no_punct=[words for words in text if words not in string.punctuation or words == "-"]
     words_wo_punct=''.join(no_punct)
     return words_wo_punct
 
