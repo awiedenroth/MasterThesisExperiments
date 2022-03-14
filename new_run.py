@@ -26,9 +26,9 @@ if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 configuration = {
-    "fasttext_zusatzdaten": True,
+    "fasttext_zusatzdaten": False,
     "meta_zusatzdaten" : False,
-    "selbstständige" : "ohne",
+    "selbstständige" : "nur",
     "oesch" : "oesch8",
     "lowercase" : True,
     "remove_stopwords": True,
@@ -107,11 +107,12 @@ if __name__ == "__main__":
         X_test_fasttext, y_test_fasttext = finalize_data(X_test_fasttext, configuration, shuffle = True)
 
         # Meta daten werden geshufflet
-        X_train_meta, y_train_meta = shuffle(X_train_meta, y_train_meta)
-        X_test_meta, y_test_meta = shuffle(X_test_meta, y_test_meta)
+        X_train_meta, y_train_meta = shuffle(X_train_meta, y_train_meta, random_state=configuration["random_seed"])
+        X_test_meta, y_test_meta = shuffle(X_test_meta, y_test_meta,  random_state=configuration["random_seed"])
 
 
         # hier füge ich die anderen Metriken hinzu
+        # Todo: hier muss ich den evaluierer überarbeiten und so machen dass es gleich die richtigen plots gibt!
         evaluierer = Evaluierer()
 
         print("trainiere meta Modell")
@@ -137,21 +138,24 @@ if __name__ == "__main__":
         #json.dump(evaluation_fasttext, open("Ergebnisse/fasttext_8_80_n_0.json", 'w'))
 
 
-        # erzeuge Daten für Combi model
+        # erzeuge Daten für Combi model: stelle nochmal Ursprungsdatensätze her (also ohne augmentierung oder zusatzdaten)
+        # lasse diese durch trainierte Modelle laufen so dass diese für jede der 8 bzw 16 klassen eine wahrscheinlichkeit
+        # ausgeben, diese werden dann in ein 2 dimensionales np array gepackt, wo jede zeile ein datenpunkt ist und eine
+        # spalte die wahrscheinlichkeitsverteilung von fasttext, die andere die wahrscheinlichkeitsverteilung von meta ist
+        # abschließend shuffle ich die daten noch
 
         fasttext_raw_train, y_train_combi = finalize_data(fasttext_df.iloc[train_index], configuration, shuffle=False)
         fasttext_proba = fasttext_model.predict_proba(fasttext_raw_train)
         meta_proba = meta_model.predict_proba(X_meta[train_index])
         X_train_combi = np.concatenate((fasttext_proba, meta_proba), axis=1)
-        # todo: muss ich noch shufflen!
-
+        X_train_combi, y_train_combi = shuffle(X_train_combi, y_train_combi, random_state=configuration["random_seed"])
 
         # erzeuge validierungsdaten für combi model
         fasttext_raw_test, y_test_combi = finalize_data(fasttext_df.iloc[test_index], configuration, shuffle=False)
         fasttext_proba_test = fasttext_model.predict_proba(fasttext_raw_test)
         meta_proba_test = meta_model.predict_proba(X_meta[test_index])
         X_test_combi = np.concatenate((fasttext_proba_test, meta_proba_test), axis=1)
-        # todo: muss ich noch shufflen!
+        X_test_combi, y_test_combi = shuffle(X_test_combi, y_test_combi, random_state=configuration["random_seed"])
 
         print("trainiere Combi Modell")
 
