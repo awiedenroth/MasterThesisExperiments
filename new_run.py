@@ -4,7 +4,9 @@ from presplit_datengenerierung import Datengenerierer
 from zusatzdatengenerierung import Zusatzdatengenerierer
 from sklearn.model_selection import train_test_split
 from data_cleaning import clean_data
-from modelltraining import Modelltrainer
+from modelltraining import train_ft
+from modelltraining import train_meta
+from modelltraining import train_combi
 from evaluation import Evaluierer
 from datenaugementierung import augment_data
 from finalize_dataset import finalize_data
@@ -23,9 +25,9 @@ if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 configuration = {
-    "fasttext_zusatzdaten": False,
+    "fasttext_zusatzdaten": True,
     "meta_zusatzdaten" : False,
-    "selbstständige" : "nur",
+    "selbstständige" : "ohne",
     "oesch" : "oesch8",
     "lowercase" : True,
     "remove_stopwords": True,
@@ -67,7 +69,7 @@ if __name__ == "__main__":
     ergebnisse = {}
     # index um zu tracken bei welchem durchgang man ist
     i = 0
-    kf = KFold(n_splits=8)
+    kf = KFold(n_splits=4)
     # die for schleife geht k mal durch
     for train_index, test_index in kf.split(fasttext_df):
         print("Durchgang ", i)
@@ -100,18 +102,18 @@ if __name__ == "__main__":
         X_train_fasttext = augment_data(X_train_fasttext, configuration)
 
         # ich erzeuge aus training_df und test_df die embeddings bei den fasttext dingen und shuffle
-        X_train_fasttext, y_train_fasttext = finalize_data(X_train_fasttext, configuration)
-        X_test_fasttext, y_test_fasttext = finalize_data(X_test_fasttext, configuration)
+        X_train_fasttext, y_train_fasttext = finalize_data(X_train_fasttext, configuration, shuffle = True)
+        X_test_fasttext, y_test_fasttext = finalize_data(X_test_fasttext, configuration, shuffle = True)
 
+        #todo: ich muss meta datan auch shufflen! muss ich sie garnicht augmentieren?
 
 
         # hier füge ich die anderen Metriken hinzu
-        modelltrainer = Modelltrainer(0, "merror")
         evaluierer = Evaluierer()
 
         print("trainiere meta Modell")
-        # Todo: was zur fucking hölle ist hier los?!? es sagt immer "Wrong number of arguments for train_meta(self, X, y, hyperparameter):"
-        meta_model = modelltrainer.train_meta(X_train_meta, y_train_meta, hyperparameter=None)
+
+        meta_model = train_meta(X_train_meta, y_train_meta, configuration)
         evaluation_meta = evaluierer.make_evaluation(meta_model, X_train_meta, y_train_meta,
                                                          X_test_meta, y_test_meta)
         print("Meta Modell: ")
@@ -122,7 +124,7 @@ if __name__ == "__main__":
 
 
         print("trainiere fasttext Modell")
-        fasttext_model = modelltrainer.train_ft(X_train_fasttext, y_train_fasttext, hyperparameter=None)
+        fasttext_model = train_ft(X_train_fasttext, y_train_fasttext, configuration)
         evaluation_fasttext = evaluierer.make_evaluation(fasttext_model, X_train_fasttext, y_train_fasttext,
                                    X_test_fasttext, y_test_fasttext)
         pprint("Fasttext Modell: ")
@@ -133,21 +135,23 @@ if __name__ == "__main__":
 
         #Todo: combimodell zum laufen bringen
         # erzeuge Daten für Combi model
-        fasttext_proba = fasttext_model.predict_proba(X_train_fasttext)
-        meta_proba = meta_model.predict_proba(X_train_meta)
+
+        fasttext_raw_train, y_train_combi = finalize_data(fasttext_df.iloc[train_index], configuration, shuffle=False)
+        fasttext_proba = fasttext_model.predict_proba(fasttext_raw_train)
+        meta_proba = meta_model.predict_proba(X_meta[train_index])
         X_train_combi = np.concatenate((fasttext_proba, meta_proba), axis=1)
-        y_train_combi = (y_meta[train_index])
+        #y_train_combi = (y_meta[train_index])
 
 
         # erzeuge validierungsdaten für combi model
-        fasttext_proba_test = fasttext_model.predict_proba(X_test_fasttext)
-        meta_proba_test = meta_model.predict_proba(X_test_meta)
+        fasttext_raw_test, y_test_combi = finalize_data(fasttext_df.iloc[test_index], configuration, shuffle=False)
+        fasttext_proba_test = fasttext_model.predict_proba(fasttext_raw_test)
+        meta_proba_test = meta_model.predict_proba(X_meta[test_index])
         X_test_combi = np.concatenate((fasttext_proba_test, meta_proba_test), axis=1)
-        y_test_combi = (y_meta[test_index])
 
         print("trainiere Combi Modell")
 
-        combi_model = modelltrainer.train_combi(X_train_combi, y_train_combi, hyperparameter=None)
+        combi_model = train_combi(X_train_combi, y_train_combi, configuration)
         evaluation_combi = evaluierer.make_evaluation(combi_model, X_train_combi, y_train_combi,
                                                          X_test_combi, y_test_combi)
         print("Combi Modell evaluation: ", evaluation_combi)
@@ -169,5 +173,5 @@ if __name__ == "__main__":
 
 
 
-    json.dump(ergebnisse, open("Ergebnisse/kfold_8_nur", 'w'))
+    json.dump(ergebnisse, open("Ergebnisse/kfold_8_ohne_mit_zusatz", 'w'))
     pprint(ergebnisse)

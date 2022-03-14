@@ -7,11 +7,12 @@ from caching import mem
 # ich füge embeddings hinzu
 # dann nehme ich embeddings und labels, shuffle und erstelle datensatz daraus
 
-@mem.cache
-def finalize_data(df, config):
+#@mem.cache
+def finalize_data(df, config, shuffle):
     df["embeddings"] = df["taetigk"].apply(ft.get_word_vector)
     # shuffle Datensatz
-    df = df.sample(frac=1, random_state= config["random_seed"])
+    if shuffle == True:
+        df = df.sample(frac=1, random_state= config["random_seed"])
     # generiere X und y
     X = df["embeddings"].values
     y = df[config["oesch"]].astype(int)

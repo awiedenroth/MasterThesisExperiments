@@ -4,6 +4,8 @@ from pathlib import Path
 from copy import deepcopy
 import fastText as fasttext
 import fasttext.util
+import string
+
 import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
@@ -14,7 +16,7 @@ import nlpaug.augmenter.sentence as nas
 from caching import mem
 
 nltk.download('stopwords')
-
+string.punctuation
 # alle daten werden cleaned auch die validierungsdaten, das muss man dann immer machen
 
 @mem.cache
@@ -43,9 +45,14 @@ def remove_stopwords(string: str) -> str:
     tokenized = word_tokenize(string)
     return TreebankWordDetokenizer().detokenize([w for w in tokenized if w not in stopWords])
 
-def remove_numbers(string:str) -> str:
-    ...
+def remove_numbers(text:str) -> str:
+    no_num = [words for words in text if not words.isdigit()]
+    words_wo_num = ''.join(no_num)
+    return words_wo_num
 
-def remove_punctuation(string:str) -> str:
-    ...
+def remove_punctuation(text):
+    no_punct=[words for words in text if words not in string.punctation or words == "-"]
+    words_wo_punct=''.join(no_punct)
+    return words_wo_punct
+
 
