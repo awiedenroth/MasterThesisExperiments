@@ -39,6 +39,9 @@ def test_nur_int_ohne(df):
     assert clean_df[['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
                  'beab', 'einkommen', 'besch_arbzeit']].dtypes.all() == "int64"
 
-def test_make_dataset(df):
+def test_select_columns_for_ft(df):
     ...
     # was für types sind eig die Rückgabewerte??
+
+# todo: teste was für ein datentyp zurückkommt bei ft, ob copy nebeneffekt frei ist
+# todo: teste ob to numpy methode, was für ein datentyp kommt zurück?
