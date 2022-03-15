@@ -43,7 +43,7 @@ wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration)
 # caching funktion zur Datensatzerstellung
 @mem.cache
 def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
-    datengenerierer = Datengenerierer(configuration["oesch"], configuration["selbstständige"])
+    datengenerierer = Datengenerierer(configuration)
     zusatzdatengenerierer = Zusatzdatengenerierer(configuration["oesch"], configuration["selbstständige"])
     # ich erzeuge für fasttext und meta jeweils die grunddaten
     fasttext_df, X_meta, y_meta = datengenerierer.make_dataset()

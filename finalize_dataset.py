@@ -16,6 +16,6 @@ def finalize_data(df, config, shuffle):
     # generiere X und y
     X = df["embeddings"].values
     y = df[config["oesch"]].astype(int)
-    # mache matrix aus den Ddaten
+    # mache matrix aus den Daten
     X = np.vstack((X[i] for i in range(len(X))))
     return X,y

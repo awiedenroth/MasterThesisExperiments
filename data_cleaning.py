@@ -39,7 +39,6 @@ def clean_data(fasttext_df, config):
 def lowercase(string: str) -> str:
     return string.lower()
 
-
 def remove_stopwords(string: str) -> str:
     stopWords = set(stopwords.words('german'))
     tokenized = word_tokenize(string)

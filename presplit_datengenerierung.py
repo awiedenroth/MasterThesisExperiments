@@ -21,49 +21,49 @@ def missing_val(x):
 # Selbstständige und Datensatz nur mit Selbstständigen
 class Datengenerierer:
 
-    def __init__(self, oesch: str, selbstständige: str):
-
-        self.oesch = oesch
-        self.selbstständige = selbstständige
-
-
-        # Datensatzgenerierung aus Welle 1: 60% Trainingsdaten und 40% Validierungsdaten
-        Welle_1 = pd.read_csv("./Daten/wic_beruf-w1_data.csv", sep=";")
-        if self.selbstständige == "ohne":
-            if self.oesch == "oesch16":
+    @staticmethod
+    def _read_in_correct_data(config: dict, path: str = "./Daten/wic_beruf-w1_data.csv") -> pd.DataFrame:
+        Welle_1 = pd.read_csv(path, sep=";")
+        if config["selbstständige"] == "ohne":
+            if config["oesch"] == "oesch16":
                 Welle_1_clean = Welle_1[
                     Welle_1.oesch16.isin(["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"])]
-            elif self.oesch == "oesch8":
+            elif config["oesch"] == "oesch8":
                 Welle_1_clean = Welle_1[
                     Welle_1.oesch8.isin(["3", "4", "5", "6", "7", "8"])]
-        elif self.selbstständige == "nur":
-            if self.oesch == "oesch16":
+        elif config["selbstständige"] == "nur":
+            if config["oesch"] == "oesch16":
                 Welle_1_clean = Welle_1[
                     Welle_1.oesch16.isin(["1", "2", "3", "4"])]
-            elif self.oesch == "oesch8":
+            elif config["oesch"] == "oesch8":
                 Welle_1_clean = Welle_1[
                     Welle_1.oesch8.isin(["1", "2"])]
+        return Welle_1_clean
 
+    @staticmethod
+    def _cast_to_int_and_replace_missing(config: dict, df: pd.DataFrame) -> pd.DataFrame:
         # ich caste alle Daten für das meta-Modell zu integern ersetze in den Daten die fehlenden Werte durch -1
-        if self.selbstständige == "ohne":
-            Welle_1_clean[
-                ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit']] = Welle_1_clean[
+        if config["selbstständige"] == "ohne":
+            df[['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
+                 'beab', 'einkommen', 'besch_arbzeit']] = df[
                 ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
                  'beab', 'einkommen', 'besch_arbzeit']].applymap(lambda x: missing_val(x))
 
-        elif self.selbstständige == "nur":
+        elif config["selbstständige"] == "nur":
             # nutze hier auch die spalten erw_stat und selbst_gr
-            Welle_1_clean[
-                ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']] = Welle_1_clean[
+            df[['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
+                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']] = df[
                 ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
                  'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].applymap(lambda x: missing_val(x))
+        return df
 
-        # teile datensatz in 60% trainings und 40% validierungsdatensatz
-        # TODO diese aufteilung mache ich nicht mehr
-        self.w1_training = Welle_1_clean
-        #self.w1_validation = Welle_1_clean.drop(self.w1_training.index)
+    def __init__(self, config):
+
+        self.config = config
+
+        Welle_1_clean = self._read_in_correct_data(self.config)
+        self.w1_training = self._cast_to_int_and_replace_missing(self.config, Welle_1_clean)
+
 
     # Hier erstelle ich den Grund-Datensatz für das Fasttext Modell, indem ich die embeddings und die Oesch Werte extrahiere
     def make_dataset(self):
@@ -97,50 +97,3 @@ class Datengenerierer:
 
         # ich gebe zurück: fasttext trainingsdaten mit "taetigk", "embeddings", self.oesch, meta daten, meta_labels
         return  trainingsdaten_ft, X_w1_meta, y_w1_meta
-
-# Todo: das sollte vermutlich eine eigene Klasse sein
-    def make_combi_dataset(self, ft_model, meta_model):
-
-        # generiere Fasttext daten
-        X_ft = self.w1_training["taetigk"].apply(ft.get_word_vector).values
-        X_ft = np.vstack((X_ft[i] for i in range(len(X_ft))))
-        fasttext_proba = ft_model.predict_proba(X_ft)
-
-        # generiere Meta daten
-        if self.selbstständige == "ohne":
-            X_meta = self.w1_training[
-                ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit']].to_numpy()
-        elif self.selbstständige == "nur":
-            X_meta = self.w1_training[
-                ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].to_numpy()
-        meta_proba = meta_model.predict_proba(X_meta)
-
-        # Füge Daten  zusammen
-        X_train = np.concatenate((fasttext_proba, meta_proba), axis=1)
-        y_train = self.w1_training[self.oesch].astype(int).to_numpy()
-
-        # generiere Fasttext daten für validation
-        X_ft_val = self.w1_validation["taetigk"].apply(ft.get_word_vector).values
-        X_ft_val = np.vstack((X_ft_val[i] for i in range(len(X_ft_val))))
-        fasttext_proba_val = ft_model.predict_proba(X_ft_val)
-
-        # generiere Meta daten für validation
-        if self.selbstständige == "ohne":
-            X_meta_val = self.w1_validation[
-                ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit']].to_numpy()
-        elif self.selbstständige == "nur":
-            X_meta_val = self.w1_validation[
-                ['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
-                 'beab', 'einkommen', 'besch_arbzeit', 'erw_stat', 'selbst_gr']].to_numpy()
-        meta_proba_val = meta_model.predict_proba(X_meta_val)
-
-        # Füge Daten  zusammen
-        X_val = np.concatenate((fasttext_proba_val, meta_proba_val), axis=1)
-        y_val = self.w1_validation[self.oesch].astype(int).to_numpy()
-
-        trainingsdaten = [X_train, y_train]
-        validierungsdaten = [X_val, y_val]
-        return trainingsdaten, validierungsdaten
