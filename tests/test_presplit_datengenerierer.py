@@ -38,3 +38,7 @@ def test_nur_int_ohne(df):
     clean_df = Datengenerierer._cast_to_int_and_replace_missing(config, df)
     assert clean_df[['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
                  'beab', 'einkommen', 'besch_arbzeit']].dtypes.all() == "int64"
+
+def test_make_dataset(df):
+    ...
+    # was für types sind eig die Rückgabewerte??
