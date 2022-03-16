@@ -1,11 +1,12 @@
 import pytest
 import pandas as pd
 from presplit_datengenerierung import Datengenerierer
+from pandas.testing import assert_frame_equal
+import numpy as np
 
 @pytest.fixture()
 def df():
     return pd.read_csv("../Daten/wic_beruf-w1_data.csv", sep=";").head(10)
-
 
 def test_korrektes_einlesen_8_ohne():
     config = {"oesch": "oesch8", "selbstständige": "ohne"}
@@ -39,9 +40,34 @@ def test_nur_int_ohne(df):
     assert clean_df[['branche2', 'taetigk_hierar', 'taetigk_m1', 'taetigk_m2', 'taetigk_m3', 'taetigk_m4', 'taetigk_m5',
                  'beab', 'einkommen', 'besch_arbzeit']].dtypes.all() == "int64"
 
-def test_select_columns_for_ft(df):
-    ...
-    # was für types sind eig die Rückgabewerte??
+def test_select_columns_for_ft_type(df):
+    config = {"oesch" : "oesch8"}
+    assert type(Datengenerierer._select_columns_for_ft(config, df)) == pd.DataFrame
 
-# todo: teste was für ein datentyp zurückkommt bei ft, ob copy nebeneffekt frei ist
-# todo: teste ob to numpy methode, was für ein datentyp kommt zurück?
+
+def test_select_columns_for_ft_sideeffects(df):
+    config = {"oesch" : "oesch8"}
+    df2 = df.copy()
+    df1= Datengenerierer._select_columns_for_ft(config, df)
+    assert_frame_equal(df, df2)
+    with pytest.raises(AssertionError):
+        assert_frame_equal(df1, df2)
+
+def test_dtype_make_meta(df):
+    config = {"oesch": "oesch8", "selbstständige": "ohne"}
+    clean_df = Datengenerierer._cast_to_int_and_replace_missing(config, df)
+    X, y = Datengenerierer._make_meta_numpy(config, clean_df)
+    assert isinstance(X, np.ndarray)
+    assert isinstance(y, np.ndarray)
+    assert X.dtype == "int64"
+    assert y.dtype == "int32"
+
+def test_shape_make_meta(df):
+    config = {"oesch": "oesch8", "selbstständige": "ohne"}
+    X, y = Datengenerierer._make_meta_numpy(config, df)
+    assert X.shape[0] == y.shape[0]
+
+def test_full_make_dataset(df):
+    ...
+# ich will hier testen ob bei einzelnen Datenpunkten genau das rauskommt was ich denken würde!
+# also ob die richtigen labels dabei bleiben und sonst auch alles richtig ist
