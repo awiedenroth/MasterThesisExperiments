@@ -1,4 +1,6 @@
 import pytest
+import pandas as pd
+from shutil import rmtree
 
 @pytest.fixture()
 def x(x0):
@@ -11,6 +13,14 @@ def y():
 @pytest.fixture()
 def x0():
     return 0
+
+@pytest.fixture()
+def file(tmp_path):
+    tmp_path.mkdir()
+    filename = tmp_path/"file.csv"
+    pd.DataFrame.from_dict({"col": [1,2,3], "col2": [1.0, 2.0, 3.0]}).to_csv(filename, sep=";")
+    yield str(filename)
+    tmp_path.rmdir()
 
 def test_sth(x,y):
     assert x+y==pytest.approx(0.3)

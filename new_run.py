@@ -8,7 +8,7 @@ from data_cleaning import clean_data
 from modelltraining import train_ft
 from modelltraining import train_meta
 from modelltraining import train_combi
-from evaluation import Evaluierer
+from evaluation import make_evaluation
 from datenaugementierung import augment_data
 from finalize_dataset import finalize_data
 from sklearn.model_selection import KFold
@@ -28,7 +28,7 @@ if not sys.warnoptions:
 configuration = {
     "fasttext_zusatzdaten": False,
     "meta_zusatzdaten" : False,
-    "selbstständige" : "nur",
+    "selbstständige" : "ohne",
     "oesch" : "oesch8",
     "lowercase" : True,
     "remove_stopwords": True,
@@ -43,10 +43,9 @@ wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration)
 # caching funktion zur Datensatzerstellung
 @mem.cache
 def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
-    datengenerierer = Datengenerierer(configuration)
     zusatzdatengenerierer = Zusatzdatengenerierer(configuration["oesch"], configuration["selbstständige"])
     # ich erzeuge für fasttext und meta jeweils die grunddaten
-    fasttext_df, X_meta, y_meta = datengenerierer.make_dataset()
+    fasttext_df, X_meta, y_meta = Datengenerierer.make_dataset(configuration)
     # ich erzeuge die Zusatzdaten für fasttext und meta
     fasttext_wb_df, X_meta_z, y_meta_z = zusatzdatengenerierer.make_dataset()
 
@@ -113,12 +112,12 @@ if __name__ == "__main__":
 
         # hier füge ich die anderen Metriken hinzu
         # Todo: hier muss ich den evaluierer überarbeiten und so machen dass es gleich die richtigen plots gibt!
-        evaluierer = Evaluierer()
+        #evaluierer = Evaluierer()
 
         print("trainiere meta Modell")
 
         meta_model = train_meta(X_train_meta, y_train_meta, configuration)
-        evaluation_meta = evaluierer.make_evaluation(meta_model, X_train_meta, y_train_meta,
+        evaluation_meta = make_evaluation(meta_model, X_train_meta, y_train_meta,
                                                          X_test_meta, y_test_meta)
         print("Meta Modell: ")
         pprint(evaluation_meta)
@@ -129,7 +128,7 @@ if __name__ == "__main__":
 
         print("trainiere fasttext Modell")
         fasttext_model = train_ft(X_train_fasttext, y_train_fasttext, configuration)
-        evaluation_fasttext = evaluierer.make_evaluation(fasttext_model, X_train_fasttext, y_train_fasttext,
+        evaluation_fasttext = make_evaluation(fasttext_model, X_train_fasttext, y_train_fasttext,
                                    X_test_fasttext, y_test_fasttext)
         pprint("Fasttext Modell: ")
         pprint(evaluation_fasttext)
@@ -160,7 +159,7 @@ if __name__ == "__main__":
         print("trainiere Combi Modell")
 
         combi_model = train_combi(X_train_combi, y_train_combi, configuration)
-        evaluation_combi = evaluierer.make_evaluation(combi_model, X_train_combi, y_train_combi,
+        evaluation_combi = make_evaluation(combi_model, X_train_combi, y_train_combi,
                                                          X_test_combi, y_test_combi)
         print("Combi Modell evaluation: ", evaluation_combi)
         #with open("Trained_Models/combi_8_80_n_0.pkl", "wb") as f:

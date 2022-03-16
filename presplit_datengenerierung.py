@@ -25,20 +25,22 @@ class Datengenerierer:
         :return: dataframe which contains only those rows which fit to selbstständige selection
         """
         Welle_1 = pd.read_csv(path, sep=";")
+        Welle_1["oesch16"] = Welle_1["oesch16"].apply(str)
+        Welle_1["oesch8"] = Welle_1["oesch8"].apply(str)
         if config["selbstständige"] == "ohne":
             if config["oesch"] == "oesch16":
                 Welle_1_clean = Welle_1[
-                    Welle_1.oesch16.isin(["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"])]
+                    Welle_1.oesch16.astype(str).isin(["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"])]
             elif config["oesch"] == "oesch8":
                 Welle_1_clean = Welle_1[
-                    Welle_1.oesch8.isin(["3", "4", "5", "6", "7", "8"])]
+                    Welle_1.oesch8.astype(str).isin(["3", "4", "5", "6", "7", "8"])]
         elif config["selbstständige"] == "nur":
             if config["oesch"] == "oesch16":
                 Welle_1_clean = Welle_1[
-                    Welle_1.oesch16.isin(["1", "2", "3", "4"])]
+                    Welle_1.oesch16.astype(str).isin(["1", "2", "3", "4"])]
             elif config["oesch"] == "oesch8":
                 Welle_1_clean = Welle_1[
-                    Welle_1.oesch8.isin(["1", "2"])]
+                    Welle_1.oesch8.astype(str).isin(["1", "2"])]
         return Welle_1_clean
 
     @staticmethod
@@ -100,13 +102,13 @@ class Datengenerierer:
         return X_w1_meta, y_w1_meta
 
     @staticmethod
-    def make_dataset(config: dict):
+    def make_dataset(config: dict, path: str = "./Daten/wic_beruf-w1_data.csv"):
         """
         fügt andere Methoden zusammen und führt sie in richtiger Reihenfolge aus
         :param config: config
         :return: trainingsdaten als df, numpy arrays mit meta daten und meta labels
         """
-        Welle_1_clean = Datengenerierer._read_in_correct_data(config)
+        Welle_1_clean = Datengenerierer._read_in_correct_data(config, path)
         w1_training = Datengenerierer._cast_to_int_and_replace_missing(config, Welle_1_clean)
         trainingsdaten_ft = Datengenerierer._select_columns_for_ft(config, w1_training)
         X_w1_meta, y_w1_meta = Datengenerierer._make_meta_numpy(config, w1_training)
