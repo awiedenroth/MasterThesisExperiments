@@ -55,14 +55,7 @@ def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
     return fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z
 
 if __name__ == "__main__":
-    # hier muss ich angeben ob ich Oesch8 oder Oesch16 möchte und ob ich "nur" Selbstständige oder "ohne" Selbstständige haben möchte
-    #Todo: hier könnte ich statt strings für oesch und selbstständige etwas eleganter Oesch=8 bzw Oesch=16 und Selbstständige = true/false machen
-    """datengenerierer = Datengenerierer(configuration["oesch"],configuration["selbstständige"])
-    zusatzdatengenerierer = Zusatzdatengenerierer(configuration["oesch"],configuration["selbstständige"])
-    # ich erzeuge für fasttext und meta jeweils die grunddaten
-    fasttext_df, X_meta, y_meta = datengenerierer.make_dataset()
-    # ich erzeuge die Zusatzdaten für fasttext und meta
-    fasttext_wb_df, X_meta_z, y_meta_z = zusatzdatengenerierer.make_dataset()"""
+
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
 
     fasttext_df = clean_data(fasttext_df, configuration)
@@ -115,7 +108,6 @@ if __name__ == "__main__":
 
         # hier füge ich die anderen Metriken hinzu
         # Todo: hier muss ich den evaluierer überarbeiten und so machen dass es gleich die richtigen plots gibt!
-        #evaluierer = Evaluierer()
 
         print("trainiere meta Modell")
 

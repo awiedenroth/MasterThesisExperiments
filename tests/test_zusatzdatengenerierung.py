@@ -38,3 +38,17 @@ def test_dtype_meta(config):
     assert isinstance(y_meta, np.ndarray)
     assert X_meta.dtype == "int64"
     assert y_meta.dtype == "int32"
+
+def test_content_of_wb_oesch8(config):
+    config["oesch"] = "oesch8"
+    config["selbstständige"] = "ohne"
+    fasttext_wb_df, X_meta, y_meta = Zusatzdatengenerierer.make_dataset(config)
+    assert fasttext_wb_df[config["oesch"]].dtypes == "int64"
+    assert fasttext_wb_df.oesch8.isin([3,4,5,6,7,8]).all()
+
+def test_content_of_wb_oesch16(config):
+    config["oesch"] = "oesch16"
+    config["selbstständige"] = "ohne"
+    fasttext_wb_df, X_meta, y_meta = Zusatzdatengenerierer.make_dataset(config)
+    assert fasttext_wb_df[config["oesch"]].dtypes == "int64"
+    assert fasttext_wb_df.oesch16.isin([5,6,7,8,9,10,11,12,13,14,15,16]).all()
