@@ -2,8 +2,7 @@ import pytest
 from zusatzdatengenerierung import Zusatzdatengenerierer
 from pandas.testing import assert_frame_equal
 import pandas as pd
-
-
+import numpy as np
 
 @pytest.fixture()
 def config():
@@ -25,9 +24,17 @@ def config():
     }
 
 def test_shapes_equal_make_dataset(config):
-    trainingsdaten_ft, X_w1_meta, y_w1_meta = Zusatzdatengenerierer.make_dataset(config)
-    assert X_w1_meta.shape[0] == y_w1_meta.shape[0]
+    fasttext_wb_df, X_meta, y_meta= Zusatzdatengenerierer.make_dataset(config)
+    assert X_meta.shape[0] == y_meta.shape[0]
 
 def test_shape_ft_wb(config):
-    trainingsdaten_ft, X_w1_meta, y_w1_meta = Zusatzdatengenerierer.make_dataset(config)
-    assert type(trainingsdaten_ft) == pd.DataFrame
+    fasttext_wb_df, X_meta, y_meta= Zusatzdatengenerierer.make_dataset(config)
+    if config["selbstständige"] == "ohne":
+        assert type(fasttext_wb_df) == pd.DataFrame
+
+def test_dtype_meta(config):
+    fasttext_wb_df, X_meta, y_meta = Zusatzdatengenerierer.make_dataset(config)
+    assert isinstance(X_meta, np.ndarray)
+    assert isinstance(y_meta, np.ndarray)
+    assert X_meta.dtype == "int64"
+    assert y_meta.dtype == "int32"
