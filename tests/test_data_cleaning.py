@@ -4,11 +4,12 @@ from data_cleaning import remove_punctuation
 from data_cleaning import remove_stopwords
 from data_cleaning import remove_numbers
 import pandas as pd
+from pandas.testing import assert_frame_equal
 
 @pytest.fixture()
 def config():
     return {
-
+        "oesch": "oesch8",
         "lowercase": True,
         "remove_stopwords": True,
         "remove_numbers": True,
@@ -24,8 +25,7 @@ def df():
 #Todo: fehlenden Datenpunkt hinzufügen, der wird ja nicht rausgeschmissen weil es direkt eingelesen wird
 @pytest.fixture()
 def fasttext_df():
-    return pd.DataFrame.from_dict({"taetigk": ["bibliothekar", "projektleitung", "büro handwerksfirma", "marketingforscherin planerin"],"oesch8": ["7", "6", "6", "5"],
-                            })
+    return pd.DataFrame.from_dict({"taetigk": ["bibliothekar", "projektleitung", "büro handwerksfirma", "bildungsarbeit", "marketingforscherin planerin"],"oesch8": ["7", "6", "6", "1","5"]})
 
 @pytest.fixture()
 def text():
@@ -40,5 +40,6 @@ def test_numbers(text):
 def test_punctuation(text):
     assert remove_punctuation(text) == "Ich arbeite freiberuflich 3 mal die Woche in der Hochschule"
 
-def test_cleaning(df, config):
-    assert clean_data(df, config)
+def test_cleaning(df, config, fasttext_df):
+    clean = clean_data(df, config)[["taetigk", config["oesch"]]]
+    assert_frame_equal(clean, fasttext_df, check_dtype=False, check_column_type=False)

@@ -148,3 +148,5 @@ Wörterbücher/.~lock.isco08_Hinweise zur Kodierung.xlsx#
 /wandb
 /cache
 3.4.5
+
+tests/cache
