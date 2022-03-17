@@ -16,7 +16,7 @@ def missing_val(x):
 class Datengenerierer:
 
     @staticmethod
-    def _read_in_correct_data(config: dict, path: str = "./Daten/wic_beruf-w1_data.csv") -> pd.DataFrame:
+    def _read_in_correct_data(config: dict) -> pd.DataFrame:
         """
         Liest die korrekten Daten ein, nimmt nur die zeilen mit bzw ohne selbstständigen
 
@@ -24,7 +24,7 @@ class Datengenerierer:
         :param path: path where data is in
         :return: dataframe which contains only those rows which fit to selbstständige selection
         """
-        Welle_1 = pd.read_csv(path, sep=";")
+        Welle_1 = pd.read_csv(config["path_welle1"], sep=";")
         Welle_1["oesch16"] = Welle_1["oesch16"].apply(str)
         Welle_1["oesch8"] = Welle_1["oesch8"].apply(str)
         if config["selbstständige"] == "ohne":
@@ -102,13 +102,13 @@ class Datengenerierer:
         return X_w1_meta, y_w1_meta
 
     @staticmethod
-    def make_dataset(config: dict, path: str = "./Daten/wic_beruf-w1_data.csv"):
+    def make_dataset(config: dict):
         """
         fügt andere Methoden zusammen und führt sie in richtiger Reihenfolge aus
         :param config: config
         :return: trainingsdaten als df, numpy arrays mit meta daten und meta labels
         """
-        Welle_1_clean = Datengenerierer._read_in_correct_data(config, path)
+        Welle_1_clean = Datengenerierer._read_in_correct_data(config)
         w1_training = Datengenerierer._cast_to_int_and_replace_missing(config, Welle_1_clean)
         trainingsdaten_ft = Datengenerierer._select_columns_for_ft(config, w1_training)
         X_w1_meta, y_w1_meta = Datengenerierer._make_meta_numpy(config, w1_training)

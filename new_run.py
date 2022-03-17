@@ -35,7 +35,11 @@ configuration = {
     "remove_numbers": True,
     "remove_punctuation": True,
     "keyboard_aug" : True,
-    "random_seed": 42
+    "random_seed": 42,
+    "path_welle1": "./Daten/wic_beruf-w1_data.csv",
+    "path_welle2": "./Daten/wic_beruf-w2_data.csv",
+    "path_welle3": "./Daten/wic_beruf-w3_data.csv",
+    "path_wb": "./Wörterbücher/wic_wörterbuch_aufbereitet_oesch.csv"
 }
 
 wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration)
@@ -43,11 +47,10 @@ wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration)
 # caching funktion zur Datensatzerstellung
 @mem.cache
 def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
-    zusatzdatengenerierer = Zusatzdatengenerierer(configuration["oesch"], configuration["selbstständige"])
     # ich erzeuge für fasttext und meta jeweils die grunddaten
     fasttext_df, X_meta, y_meta = Datengenerierer.make_dataset(configuration)
     # ich erzeuge die Zusatzdaten für fasttext und meta
-    fasttext_wb_df, X_meta_z, y_meta_z = zusatzdatengenerierer.make_dataset()
+    fasttext_wb_df, X_meta_z, y_meta_z = Zusatzdatengenerierer.make_dataset(configuration)
 
     return fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z
 
