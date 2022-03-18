@@ -26,7 +26,7 @@ if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 configuration = {
-    "fasttext_zusatzdaten": False,
+    "fasttext_zusatzdaten": True,
     "meta_zusatzdaten" : False,
     "selbstständige" : "ohne",
     "oesch" : "oesch8",
@@ -34,6 +34,7 @@ configuration = {
     "remove_stopwords": True,
     "remove_numbers": True,
     "remove_punctuation": True,
+    "remove_duplicates": True,
     "keyboard_aug" : True,
     "random_seed": 42,
     "path_welle1": "./Daten/wic_beruf-w1_data.csv",
@@ -58,6 +59,7 @@ if __name__ == "__main__":
 
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
 
+    # Todo: aufzeichnen wieviel prozent der Daten durch cleaning rausgechmissen werden, jeweils für wörterbuch und welle 1 daten
     fasttext_df = clean_data(fasttext_df, configuration)
     if configuration["fasttext_zusatzdaten"] == True:
         fasttext_wb_df = clean_data(fasttext_wb_df, configuration)

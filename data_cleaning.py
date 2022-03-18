@@ -25,14 +25,17 @@ def clean_data(fasttext_df, config):
     if config["lowercase"] == True:
         fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: lowercase(x))
 
+    if config["remove_punctuation"] == True:
+        fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: remove_punctuation(x))
+
     if config["remove_stopwords"] == True:
         fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: remove_stopwords(x))
 
     if config["remove_numbers"] == True:
         fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: remove_numbers(x))
 
-    if config["remove_punctuation"] == True:
-        fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: remove_punctuation(x))
+    if config["remove_duplicates"] == True:
+        fasttext_df.drop_duplicates(subset=["taetigk", config["oesch"]], keep='first', inplace=True, ignore_index=True)
 
     return fasttext_df
 
