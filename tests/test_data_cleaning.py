@@ -45,5 +45,3 @@ def test_cleaning(df, config, fasttext_df):
     clean = clean_data(df, config)[["taetigk", config["oesch"]]]
     assert_frame_equal(clean, fasttext_df, check_dtype=False, check_column_type=False)
 
-def test_wörterbuch_cleaning():
-    assert True
