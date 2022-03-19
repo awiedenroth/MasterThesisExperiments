@@ -1,6 +1,7 @@
 from datenaugementierung import augment_data
-from finalize_dataset import finalize_data
 from sklearn.utils import shuffle
+import fastText as fasttext
+import fasttext.util
 import pandas as pd
 import numpy as np
 
@@ -36,8 +37,8 @@ class PS_Datengenerierer:
         X_train_fasttext = augment_data(X_train_fasttext, configuration)
 
         # ich erzeuge aus training_df und test_df die embeddings bei den fasttext dingen und shuffle
-        X_train_fasttext, y_train_fasttext = finalize_data(X_train_fasttext, configuration, shuffle=True)
-        X_test_fasttext, y_test_fasttext = finalize_data(X_test_fasttext, configuration, shuffle=True)
+        X_train_fasttext, y_train_fasttext = PS_Datengenerierer.finalize_data(X_train_fasttext, configuration, shuffle=True)
+        X_test_fasttext, y_test_fasttext = PS_Datengenerierer.finalize_data(X_test_fasttext, configuration, shuffle=True)
 
         return X_train_fasttext, y_train_fasttext, X_test_fasttext, y_test_fasttext
 
@@ -57,19 +58,34 @@ class PS_Datengenerierer:
         :param train_index:
         :param test_index:
         :param configuration:
-        :return: 
+        :return:
         """
-        fasttext_raw_train, y_train_combi = finalize_data(fasttext_df.iloc[train_index], configuration, shuffle=False)
+        fasttext_raw_train, y_train_combi = PS_Datengenerierer.finalize_data(fasttext_df.iloc[train_index], configuration, shuffle=False)
         fasttext_proba = fasttext_model.predict_proba(fasttext_raw_train)
         meta_proba = meta_model.predict_proba(X_meta[train_index])
         X_train_combi = np.concatenate((fasttext_proba, meta_proba), axis=1)
         X_train_combi, y_train_combi = shuffle(X_train_combi, y_train_combi, random_state=configuration["random_seed"])
 
         # erzeuge validierungsdaten für combi model
-        fasttext_raw_test, y_test_combi = finalize_data(fasttext_df.iloc[test_index], configuration, shuffle=False)
+        fasttext_raw_test, y_test_combi = PS_Datengenerierer.finalize_data(fasttext_df.iloc[test_index], configuration, shuffle=False)
         fasttext_proba_test = fasttext_model.predict_proba(fasttext_raw_test)
         meta_proba_test = meta_model.predict_proba(X_meta[test_index])
         X_test_combi = np.concatenate((fasttext_proba_test, meta_proba_test), axis=1)
         X_test_combi, y_test_combi = shuffle(X_test_combi, y_test_combi, random_state=configuration["random_seed"])
 
         return X_train_combi, y_train_combi, X_test_combi, y_test_combi
+
+    # @mem.cache
+    @staticmethod
+    def finalize_data(df, config, shuffle):
+        ft = fasttext.load_model(config["path_pretrained_fasttext_model"])
+        df["embeddings"] = df["taetigk"].apply(ft.get_word_vector)
+        # shuffle Datensatz
+        if shuffle == True:
+            df = df.sample(frac=1, random_state=config["random_seed"])
+        # generiere X und y
+        X = df["embeddings"].values
+        y = df[config["oesch"]].astype(int)
+        # mache matrix aus den Daten
+        X = np.vstack((X[i] for i in range(len(X))))
+        return X, y

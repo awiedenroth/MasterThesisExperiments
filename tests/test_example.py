@@ -28,3 +28,9 @@ def test_sth(x,y):
 def test_sth2(x,y):
     with pytest.raises(AssertionError):
         assert x+y==pytest.approx(0.6)
+
+# ungleichheit abfragen
+# bei komplizierten funktionen dumm gefakte daten testen
+# man kann sklearn usw funktionen vertrauen generell
+# dumme tests generell
+# wenn was random passieren soll: mit forschleife testen ob jedes mal was anderes rauskommt, mindest 3 mal durchlaufen lassen
