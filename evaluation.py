@@ -5,29 +5,31 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import hamming_loss
+from sklearn.metrics import plot_confusion_matrix
+
 
 
 class Evaluierer:
     @staticmethod
-    def make_evaluation(model, X_train, y_train, X_val, y_val):
+    def make_evaluation(model, X_train, y_train, X_val, y_val, modelname):
 
         y_train_pred = model.predict(X_train)
         y_val_pred = model.predict(X_val)
 
         result = {}
-        result["train accuracy"] = model.score(X_train, y_train)
-        result["train balanced acc"] = balanced_accuracy_score(y_train, y_train_pred)
-        result["train balanced adjusted accuracy"] = balanced_accuracy_score(y_train, y_train_pred, adjusted=True)
+        result[f"{modelname} train accuracy"] = model.score(X_train, y_train)
+        result[f"{modelname} train balanced acc"] = balanced_accuracy_score(y_train, y_train_pred)
+        result[f"{modelname} train balanced adjusted accuracy"] = balanced_accuracy_score(y_train, y_train_pred, adjusted=True)
 
-        result["validation accuracy"] = model.score(X_val, y_val)
-        result["validation balanced acc"] = balanced_accuracy_score(y_val, y_val_pred)
-        result["validation balanced adjusted accuracy"] = balanced_accuracy_score(y_val, y_val_pred, adjusted=True)
+        result[f"{modelname} validation accuracy"] = model.score(X_val, y_val)
+        result[f"{modelname} validation balanced acc"] = balanced_accuracy_score(y_val, y_val_pred)
+        result[f"{modelname} validation balanced adjusted accuracy"] = balanced_accuracy_score(y_val, y_val_pred, adjusted=True)
 
-        result["micro-f1 score"] = f1_score(y_val, y_val_pred, average='micro')
-        result["macro-f1 score"] = f1_score(y_val, y_val_pred, average='macro')
-        result["precision score"] = precision_score(y_val, y_val_pred, average='weighted')
-        result["recall score"] = recall_score(y_val, y_val_pred, average='weighted')
-        result["hamming loss"] = hamming_loss(y_val, y_val_pred)
+        result[f"{modelname} micro-f1 score"] = f1_score(y_val, y_val_pred, average='micro')
+        result[f"{modelname} macro-f1 score"] = f1_score(y_val, y_val_pred, average='macro')
+        result[f"{modelname} precision score"] = precision_score(y_val, y_val_pred, average='weighted')
+        result[f"{modelname} recall score"] = recall_score(y_val, y_val_pred, average='weighted')
+        result[f"{modelname} hamming loss"] = hamming_loss(y_val, y_val_pred)
 
         return result
 
@@ -70,16 +72,16 @@ class Evaluierer:
 
 
         result = {}
-        result["confidence"] = confidence
-        result["deleted datapoints:"] = deleted
-        result["percentage deleted train:"] = deleted/total
-        result["train accuracy"] = accuracy_score(y_train, y_train_pred)
-        result["train balanced acc"] = balanced_accuracy_score(y_train, y_train_pred)
-        result["train balanced adjusted accuracy"] = balanced_accuracy_score(y_train, y_train_pred, adjusted=True)
-        result["deleted datapoints val:"] = deleted_val
-        result["percentage deleted val:"] = deleted_val / total_val
-        result["validation accuracy"] = accuracy_score(y_val, y_val_pred)
-        result["validation balanced acc"] = balanced_accuracy_score(y_val, y_val_pred)
-        result["validation balanced adjusted accuracy"] = balanced_accuracy_score(y_val, y_val_pred, adjusted=True)
+        result[f"confidence"] = confidence
+        result[f"deleted datapoints @{confidence}: "] = deleted
+        result[f"percentage deleted train @{confidence}: "] = deleted/total
+        result[f"train accuracy @{confidence}: "] = accuracy_score(y_train, y_train_pred)
+        result[f"train balanced acc @{confidence}: "] = balanced_accuracy_score(y_train, y_train_pred)
+        result[f"train balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_train, y_train_pred, adjusted=True)
+        result[f"deleted datapoints val @{confidence}: "] = deleted_val
+        result[f"percentage deleted val @{confidence}: "] = deleted_val / total_val
+        result[f"validation accuracy @{confidence}: "] = accuracy_score(y_val, y_val_pred)
+        result[f"validation balanced acc @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred)
+        result[f"validation balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred, adjusted=True)
 
         return result
