@@ -1,27 +1,37 @@
+from typing import List, Dict, Any
+
 import numpy as np
 
 def calculate_average(ergebnisse):
-    train_accuracy= []
-    train_balanced_acc =  []
-    result[f"{modelname} train accuracy"] = model.score(X_train, y_train)
-    result[f"{modelname} train balanced acc"] = balanced_accuracy_score(y_train, y_train_pred)
-    result[f"{modelname} train balanced adjusted accuracy"] = balanced_accuracy_score(y_train, y_train_pred,
-                                                                                      adjusted=True)
+    agg_dict = aggregate_dicts(ergebnisse)
+    average = reduce_agg_dict(agg_dict)
+    return average
 
-    result[f"{modelname} validation accuracy"] = model.score(X_val, y_val)
-    result[f"{modelname} validation balanced acc"] = balanced_accuracy_score(y_val, y_val_pred)
-    result[f"{modelname} validation balanced adjusted accuracy"] = balanced_accuracy_score(y_val, y_val_pred,
-                                                                                           adjusted=True)
-
-    result[f"{modelname} micro-f1 score"] = f1_score(y_val, y_val_pred, average='micro')
-    result[f"{modelname} macro-f1 score"] = f1_score(y_val, y_val_pred, average='macro')
-    result[f"{modelname} precision score"] = precision_score(y_val, y_val_pred, average='weighted')
-    result[f"{modelname} recall score"] = recall_score(y_val, y_val_pred, average='weighted')
-    result[f"{modelname} hamming loss"] = hamming_loss(y_val, y_val_pred)
-
-    for ergebnis in ergebnisse:
-
+def calculate_conf_average(ergebnisse:List[List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
+    list_of_first = list_of_firsts(ergebnisse)
+    result = []
+    for list in list_of_first:
+        result.append(calculate_average(list))
+    return result
 
     # ich iteriere durch die dicts für jeden k durchgang und summiere jeweils die werte an den richtigen positionen
     # dann teile ich durch k
     # damit bekomme ich den average metrik für die configuration
+
+def aggregate_dicts(dict_list: List[Dict[str, Any]])-> Dict[str, List[Any]]:
+    return {key: [i[key] for i in dict_list] for key in dict_list[0]}
+
+def reduce_agg_dict(agg_dict: Dict[str, List[Any]], func=np.mean) -> Dict[str, Any]:
+    return {key: func(agg_dict[key]) for key in agg_dict}
+
+def list_of_firsts(ergebnisse:List[List[Dict[str, Any]]])->List[List[Dict[str, Any]]]:
+    result = []
+    for i in range(len(ergebnisse)):
+        zwischen = []
+        for list in ergebnisse:
+            zwischen.append(list[i])
+        result.append(zwischen)
+
+    return result
+
+
