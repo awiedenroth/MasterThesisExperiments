@@ -70,7 +70,11 @@ if __name__ == "__main__":
     if configuration["fasttext_zusatzdaten"] == True:
         fasttext_wb_df = clean_data(fasttext_wb_df, configuration)
     #dict zum abspeichern der ergebnisse
-    ergebnisse = {}
+    ergebnisse = []
+    meta_ergebnisse = []
+    ft_ergebnisse = []
+    combi_ergebnisse = []
+    combi_conf_ergebnisse = []
     # index um zu tracken bei welchem durchgang man ist
     i = 0
     kf = KFold(n_splits=configuration["k_fold_splits"], shuffle = True, random_state = configuration["random_seed"])
@@ -96,8 +100,9 @@ if __name__ == "__main__":
 
         meta_model = train_meta(X_train_meta, y_train_meta, configuration)
         evaluation_meta = Evaluierer.make_evaluation(meta_model, X_train_meta, y_train_meta,
-                                                         X_test_meta, y_test_meta, modelname = "meta")
-        plt.figure(figsize=(10, 10))
+                                                         X_test_meta, y_test_meta, modelname = "meta", run = i)
+        meta_ergebnisse.append(evaluation_meta)
+        """plt.figure(figsize=(10, 10))
         plot_confusion_matrix(meta_model, X_test_meta, y_test_meta, normalize=None, ax=plt.gca())
         plt.tight_layout()
         wandb.log({f"meta model run{i}": plt})
@@ -105,27 +110,25 @@ if __name__ == "__main__":
         plt.figure(figsize=(10, 10))
         plot_confusion_matrix(meta_model, X_test_meta, y_test_meta, normalize="true", ax=plt.gca())
         plt.tight_layout()
-        wandb.log({f"meta model normalized run{i}": plt})
+        wandb.log({f"meta model normalized run{i}": plt})"""
 
         print("Meta Modell: ")
         pprint(evaluation_meta)
-        #with open("Trained_Models/meta_8_80_n_0.pkl", "wb") as f:
-        #    pickle.dump(meta_model, f)
-        #json.dump(evaluation_meta, open("Ergebnisse/meta_8_80_o_0.json", 'w'))
-
 
         print("trainiere fasttext Modell")
         fasttext_model = train_ft(X_train_fasttext, y_train_fasttext, configuration)
         evaluation_fasttext = Evaluierer.make_evaluation(fasttext_model, X_train_fasttext, y_train_fasttext,
-                                   X_test_fasttext, y_test_fasttext, modelname = "fasttext")
-        plt.figure(figsize=(10, 10))
+                                   X_test_fasttext, y_test_fasttext, modelname = "fasttext", run = i)
+        ft_ergebnisse.append(evaluation_fasttext)
+        """plt.figure(figsize=(10, 10))
         plot_confusion_matrix(fasttext_model, X_test_fasttext, y_test_fasttext, normalize=None, ax=plt.gca())
         plt.tight_layout()
         wandb.log({f"fasttext model run{i}": plt})
         plt.figure(figsize=(10, 10))
         plot_confusion_matrix(fasttext_model, X_test_fasttext, y_test_fasttext, normalize="true", ax=plt.gca())
         plt.tight_layout()
-        wandb.log({f"fasttext model normalized run{i}": plt})
+        wandb.log({f"fasttext model normalized run{i}": plt})"""
+
         pprint("Fasttext Modell: ")
         pprint(evaluation_fasttext)
 
@@ -136,28 +139,30 @@ if __name__ == "__main__":
 
         combi_model = train_combi(X_train_combi, y_train_combi, configuration)
         evaluation_combi = Evaluierer.make_evaluation(combi_model, X_train_combi, y_train_combi,
-                                                         X_test_combi, y_test_combi, modelname = "combi")
-        plt.figure(figsize=(10, 10))
+                                                         X_test_combi, y_test_combi, modelname = "combi", run = i)
+        combi_ergebnisse.append(evaluation_combi)
+        """plt.figure(figsize=(10, 10))
         plot_confusion_matrix(combi_model, X_test_combi, y_test_combi, normalize=None, ax=plt.gca())
         plt.tight_layout()
         wandb.log({f"combi model run{i}": plt})
         plt.figure(figsize=(10, 10))
         plot_confusion_matrix(combi_model, X_test_combi, y_test_combi, normalize="true", ax=plt.gca())
         plt.tight_layout()
-        wandb.log({f"combi model normalized run{i}": plt})
+        wandb.log({f"combi model normalized run{i}": plt})"""
 
         pprint("Combi Modell evaluation: ")
         pprint(evaluation_combi)
-
+        evaluation_combi_confidence = []
         for confidence in [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,0.9,0.91,0.92,0.93]:#,0.94,0.95,0.96,0.97,0.98,0.99,0.992,0.994,0.995, 0.996]:
             path = "Ergebnisse/combi_8_80_n_0_"
-            evaluation_combi_confidence = Evaluierer.make_evaluation_confidence(combi_model, X_train_combi, y_train_combi, X_test_combi, y_test_combi, confidence)
+            evaluation_combi_confidence.append(Evaluierer.make_evaluation_confidence(combi_model, X_train_combi, y_train_combi, X_test_combi, y_test_combi, confidence, run=i))
             pprint("Combi Modell evaluation mit confidence")
             pprint((confidence, evaluation_combi_confidence))
             path += str(confidence) + ".json"
             json.dump(evaluation_combi_confidence, open(path, 'w'))
-        ergebnisse[i] = {"meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi}
-        wandb.log({"cross validation Durchgang": i, "meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi})
+        combi_conf_ergebnisse.append(evaluation_combi_confidence)
+        #ergebnisse.append({"meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi, "combi_confidence": evaluation_combi_confidence})
+        #wandb.log({"cross validation Durchgang": i, "meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi, "combi_confidence": evaluation_combi_confidence})
         i = i+1
 
     json.dump(ergebnisse, open("Ergebnisse/kfold_8_ohne_ohne_zusatz", 'w'))

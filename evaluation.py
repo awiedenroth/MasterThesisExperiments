@@ -6,12 +6,15 @@ from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import hamming_loss
 from sklearn.metrics import plot_confusion_matrix
+import wandb
+from sklearn.metrics import plot_confusion_matrix
+from matplotlib import pyplot as plt
 
 
 
 class Evaluierer:
     @staticmethod
-    def make_evaluation(model, X_train, y_train, X_val, y_val, modelname):
+    def make_evaluation(model, X_train, y_train, X_val, y_val, modelname, run):
 
         y_train_pred = model.predict(X_train)
         y_val_pred = model.predict(X_val)
@@ -31,11 +34,23 @@ class Evaluierer:
         result[f"{modelname} recall score"] = recall_score(y_val, y_val_pred, average='weighted')
         result[f"{modelname} hamming loss"] = hamming_loss(y_val, y_val_pred)
 
+        wandb.log({f"{modelname} run {run}": result})
+
+        plt.figure(figsize=(10, 10))
+        plot_confusion_matrix(model, X_val, y_val, normalize=None, ax=plt.gca())
+        plt.tight_layout()
+        wandb.log({f"{modelname} run{run}": plt})
+
+        plt.figure(figsize=(10, 10))
+        plot_confusion_matrix(model, X_val, y_val, normalize="true", ax=plt.gca())
+        plt.tight_layout()
+        wandb.log({f"{modelname} normalized run{run}": plt})
+
         return result
 
     # todo: muss getestet werden
     @staticmethod
-    def make_evaluation_confidence(model, X_train, y_train, X_val, y_val, confidence):
+    def make_evaluation_confidence(model, X_train, y_train, X_val, y_val, confidence, run):
         y_train_pred_proba = model.predict_proba(X_train)
         y_val_pred_proba = model.predict_proba(X_val)
 
@@ -83,5 +98,7 @@ class Evaluierer:
         result[f"validation accuracy @{confidence}: "] = accuracy_score(y_val, y_val_pred)
         result[f"validation balanced acc @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred)
         result[f"validation balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred, adjusted=True)
+
+        wandb.log({f"combi model run {run} at confidence {confidence}": result})
 
         return result
