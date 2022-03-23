@@ -14,6 +14,14 @@ def calculate_conf_average(ergebnisse:List[List[Dict[str, Any]]]) -> List[Dict[s
         result.append(calculate_average(list))
     return result
 
+def calculate_average_report(ergebnisse:List[Dict[str, Dict[str, float]]]) -> Dict[str, Dict[str, float]]:
+    agg1 = aggregate_dicts(ergebnisse)
+    for key, liste in agg1.items():
+        agg2 = aggregate_dicts(liste)
+        reduced = reduce_agg_dict(agg2)
+        agg1[key] = reduced
+    return agg1
+
     # ich iteriere durch die dicts für jeden k durchgang und summiere jeweils die werte an den richtigen positionen
     # dann teile ich durch k
     # damit bekomme ich den average metrik für die configuration
