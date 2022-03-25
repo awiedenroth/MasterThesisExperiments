@@ -1,4 +1,5 @@
 from typing import Union, Dict, Any
+import time
 from postsplit_datengenerierung import PS_Datengenerierer
 from presplit_datengenerierung import Datengenerierer
 from zusatzdatengenerierung import Zusatzdatengenerierer
@@ -52,7 +53,7 @@ configuration = {
     "combi_model": "nn" # "xgboost" oder "nn" oder "linear"
 }
 
-run = wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration, name=f"{configuration['oesch']} {configuration['selbstständige']} {configuration['combi_model']}")
+run = wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration, name=f"{configuration['oesch']} {configuration['selbstständige']} {configuration['combi_model']} alle Daten")
 
 # caching funktion zur Datensatzerstellung
 @mem.cache
@@ -88,8 +89,10 @@ if __name__ == "__main__":
     # index um zu tracken bei welchem durchgang man ist
     i = 0
     kf = KFold(n_splits=configuration["k_fold_splits"], shuffle = True, random_state = configuration["random_seed"])
+
     # die for schleife geht k mal durch
     for train_index, test_index in kf.split(fasttext_df):
+        start_time = time.time()
         print("Durchgang ", i)
 
         X_train_fasttext, y_train_fasttext, X_test_fasttext, y_test_fasttext = \
@@ -150,6 +153,9 @@ if __name__ == "__main__":
         combi_conf_ergebnisse.append(evaluation_combi_confidence)
         #ergebnisse.append({"meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi, "combi_confidence": evaluation_combi_confidence})
         #wandb.log({"cross validation Durchgang": i, "meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi, "combi_confidence": evaluation_combi_confidence})
+
+        zeit = round(time.time() - start_time, 2)
+        wandb.log({f"Dauer Durchlauf {i}: ": zeit})
         i = i+1
 
     # hier berechne ich die averages von den einzelnen modell-evaluationen und speicher diese weg, diese sind das wichtigste für meine Auswertung
@@ -179,6 +185,12 @@ if __name__ == "__main__":
     wandb.log({"combi model validation average performance": combi_val_average})
 
     wandb.log({"combi confidence model average performance": combi_conf_average})
+    wandb.log({"Gesamtanzahl Datenpunkte Grunddaten vor k-split = ", len(fasttext_df),
+               "Anzahl Trainingsdaten ohne Zusatzdaten", len(fasttext_df) - len(X_test_fasttext),
+               "Anzahl Fasttext Trainingsdaten inklusive Zusatzdaten", len(X_train_fasttext),
+               "Anzahl fasttext Validierungsdaten = ", len(X_test_fasttext),
+               "Anzahl meta Trainingsdaten inklusive Zusatzdaten = ", len(X_train_meta),
+               "Anzahl meta Validierungsdaten = ", len(X_test_meta)})
 
     pprint(meta_average)
     pprint(ft_average)
