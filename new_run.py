@@ -5,6 +5,7 @@ from zusatzdatengenerierung import Zusatzdatengenerierer
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 from data_cleaning import clean_data
+from data_cleaning import remove_duplicates
 from modelltraining import train_ft
 from modelltraining import train_meta
 from modelltraining import train_combi
@@ -26,21 +27,18 @@ from average_calculater import calculate_average
 from average_calculater import calculate_conf_average
 from average_calculater import calculate_average_report
 
-
-
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 configuration = {
-    "fasttext_zusatzdaten": False,
-    "meta_zusatzdaten" : False,
+    "fasttext_zusatzdaten": True,
+    "meta_zusatzdaten" : True,
     "selbstständige" : "ohne",
     "oesch" : "oesch16",
     "lowercase" : False,
     "remove_stopwords": False,
     "remove_numbers": False,
     "remove_punctuation": False,
-    "remove_duplicates": True,
     "keyboard_aug" : True,
     "random_seed": 42,
     "path_welle1": "./Daten/welle1_und_3.csv",
@@ -48,10 +46,10 @@ configuration = {
     "path_welle3": "./Daten/wic_beruf-w4_data.csv",
     "path_wb": "./Wörterbücher/wic_wörterbuch_aufbereitet_oesch.csv",
     "path_pretrained_fasttext_model": "cc.de.300.bin",
-    "k_fold_splits": 4,
-    "ft_model": "xgboost",
-    "meta_model": "xgboost",
-    "combi_model": "xgboost" # "xgboost" oder "nn" oder "linear"
+    "k_fold_splits": 10,
+    "ft_model": "nn",
+    "meta_model": "nn",
+    "combi_model": "nn" # "xgboost" oder "nn" oder "linear"
 }
 
 run = wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration, name=f"{configuration['oesch']} {configuration['selbstständige']} {configuration['combi_model']}")
@@ -74,6 +72,7 @@ if __name__ == "__main__":
     fasttext_df = clean_data(fasttext_df, configuration)
     if configuration["fasttext_zusatzdaten"] == True and configuration["selbstständige"] == "ohne":
         fasttext_wb_df = clean_data(fasttext_wb_df, configuration)
+        fasttext_wb_df = remove_duplicates(fasttext_wb_df, configuration)
     #dict zum abspeichern der ergebnisse
     ergebnisse = []
     meta_ergebnisse = []
@@ -99,14 +98,14 @@ if __name__ == "__main__":
         X_train_meta, y_train_meta, X_test_meta, y_test_meta = \
             PS_Datengenerierer.make_ps_data_meta(X_meta, y_meta, X_meta_z, y_meta_z, configuration, train_index, test_index)
 
-        # todo: anpassen dass print statements korrekt sind
-        print("Anteil Trainingsdaten = ", len(X_train_fasttext), "von", len(fasttext_df))
-        print("Anzahl fasttext Trainingsdaten inklusive Zusatzdaten = ", len(X_train_fasttext))
+
+        print("Gesamtanzahl Datenpunkte Grunddaten vor k-split = ", len(fasttext_df))
+        print("Anzahl Trainingsdaten ohne Zusatzdaten", len(fasttext_df)-len(X_test_fasttext))
+        print("Anzahl Fasttext Trainingsdaten inklusive Zusatzdaten", len(X_train_fasttext))
         print("Anzahl fasttext Validierungsdaten = ", len(X_test_fasttext))
         print("Anzahl meta Trainingsdaten inklusive Zusatzdaten = ", len(X_train_meta))
         print("Anzahl meta Validierungsdaten = ", len(X_test_meta))
 
-        # Todo: hier muss ich den evaluierer überarbeiten und so machen dass es gleich die richtigen plots gibt!
 
         print("trainiere meta Modell")
 
@@ -146,10 +145,8 @@ if __name__ == "__main__":
        # pprint("Combi Modell evaluation: ")
         #pprint(evaluation_combi)
         evaluation_combi_confidence = []
-        for confidence in [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,0.9,0.91,0.92,0.93]: #,0.94,0.95,0.96,0.97,0.98,0.99,0.992,0.994,0.995, 0.996]:
+        for confidence in [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,0.992,0.994,0.995, 0.996, 0.997, 0.998]:
             evaluation_combi_confidence.append(Evaluierer.make_evaluation_confidence(combi_model, X_train_combi, y_train_combi, X_test_combi, y_test_combi, confidence, run=i))
-            #pprint("Combi Modell evaluation mit confidence")
-            #pprint((confidence, evaluation_combi_confidence))
         combi_conf_ergebnisse.append(evaluation_combi_confidence)
         #ergebnisse.append({"meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi, "combi_confidence": evaluation_combi_confidence})
         #wandb.log({"cross validation Durchgang": i, "meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi, "combi_confidence": evaluation_combi_confidence})

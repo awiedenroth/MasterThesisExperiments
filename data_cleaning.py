@@ -34,9 +34,6 @@ def clean_data(fasttext_df, config):
     if config["remove_numbers"] == True:
         fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: remove_numbers(x))
 
-    if config["remove_duplicates"] == True:
-        fasttext_df.drop_duplicates(subset=["taetigk", config["oesch"]], keep='first', inplace=True, ignore_index=True)
-
     return fasttext_df
 
 def lowercase(string: str) -> str:
@@ -56,5 +53,9 @@ def remove_punctuation(text):
     no_punct=[words for words in text if words not in string.punctuation or words == "-"]
     words_wo_punct=''.join(no_punct)
     return words_wo_punct
+
+def remove_duplicates(df, config):
+    df.drop_duplicates(subset=["taetigk", config["oesch"]], keep='first', inplace=True, ignore_index=True)
+    return df
 
 

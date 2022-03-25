@@ -6,7 +6,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
 
 
-@mem.cache
 def train_ft(X, y, config):
     if config["ft_model"] == "xgboost":
         ft_model = xgb.XGBClassifier(n_jobs=-1, random_state= config["random_seed"])
@@ -17,12 +16,11 @@ def train_ft(X, y, config):
         ft_model.fit(X, y)
 
     if config["ft_model"] == "nn":
-        ft_model = MLPClassifier(hidden_layer_sizes= (150,75), random_state= config["random_seed"], max_iter=300)
+        ft_model = MLPClassifier(hidden_layer_sizes= (100,), random_state= config["random_seed"], max_iter=300)
         ft_model.fit(X, y)
 
     return ft_model
 
-@mem.cache
 def train_meta(X, y, config):
     if config["meta_model"] == "xgboost":
         meta_model = xgb.XGBClassifier(n_jobs=-1, random_state= config["random_seed"])
@@ -33,12 +31,11 @@ def train_meta(X, y, config):
         meta_model.fit(X, y)
 
     if config["meta_model"] == "nn":
-        meta_model = MLPClassifier(hidden_layer_sizes= (12,6), random_state= config["random_seed"], max_iter=300)
+        meta_model = MLPClassifier(hidden_layer_sizes= (100,), random_state= config["random_seed"], max_iter=300)
         meta_model.fit(X, y)
 
     return meta_model
 
-@mem.cache
 def train_combi(X, y, config):
 
     if config["combi_model"] == "xgboost":
@@ -50,7 +47,7 @@ def train_combi(X, y, config):
         combi_model.fit(X, y)
 
     if config["combi_model"] == "nn":
-        combi_model = MLPClassifier(hidden_layer_sizes= (16,8), random_state= config["random_seed"], max_iter=300)
+        combi_model = MLPClassifier(hidden_layer_sizes= (100,), random_state= config["random_seed"], max_iter=300)
         combi_model.fit(X, y)
 
     return combi_model

@@ -133,22 +133,25 @@ class Evaluierer:
             else:
                 deleted_val += 1
 
-        y_val_pred = model.predict(np.asarray(X_val_clean))
-        y_val = np.asarray(y_val_clean)
+        if len(y_val_clean) > 1:
+            y_val_pred = model.predict(np.asarray(X_val_clean))
+            y_val = np.asarray(y_val_clean)
 
 
-        result = {}
-        result[f"confidence"] = confidence
-        result[f"deleted datapoints @{confidence}: "] = deleted
-        result[f"percentage deleted train @{confidence}: "] = deleted/total
-        result[f"train accuracy @{confidence}: "] = accuracy_score(y_train, y_train_pred)
-        result[f"train balanced acc @{confidence}: "] = balanced_accuracy_score(y_train, y_train_pred)
-        result[f"train balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_train, y_train_pred, adjusted=True)
-        result[f"deleted datapoints val @{confidence}: "] = deleted_val
-        result[f"percentage deleted val @{confidence}: "] = deleted_val / total_val
-        result[f"validation accuracy @{confidence}: "] = accuracy_score(y_val, y_val_pred)
-        result[f"validation balanced acc @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred)
-        result[f"validation balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred, adjusted=True)
+            result = {}
+            result[f"confidence: "] = confidence
+            result[f"deleted datapoints @{confidence}: "] = deleted
+            result[f"percentage deleted train @{confidence}: "] = deleted/total
+            result[f"train accuracy @{confidence}: "] = accuracy_score(y_train, y_train_pred)
+            result[f"train balanced acc @{confidence}: "] = balanced_accuracy_score(y_train, y_train_pred)
+            result[f"train balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_train, y_train_pred, adjusted=True)
+            result[f"deleted datapoints val @{confidence}: "] = deleted_val
+            result[f"percentage deleted val @{confidence}: "] = deleted_val / total_val
+            result[f"validation accuracy @{confidence}: "] = accuracy_score(y_val, y_val_pred)
+            result[f"validation balanced acc @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred)
+            result[f"validation balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred, adjusted=True)
+        else:
+            result = {"confidence: " : confidence, f"percentage deleted val @{confidence}: ": "100%"}
 
         wandb.log({f"combi model run {run} at confidence {confidence}": result})
 
