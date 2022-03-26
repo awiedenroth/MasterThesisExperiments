@@ -1,29 +1,22 @@
+from copy import deepcopy
 from typing import Union, Dict, Any
 import time
+from tqdm import tqdm
 from postsplit_datengenerierung import PS_Datengenerierer
 from presplit_datengenerierung import Datengenerierer
 from zusatzdatengenerierung import Zusatzdatengenerierer
-from sklearn.model_selection import train_test_split
-from sklearn.utils import shuffle
 from data_cleaning import clean_data
 from data_cleaning import remove_duplicates
 from modelltraining import train_ft
 from modelltraining import train_meta
 from modelltraining import train_combi
 from evaluation import Evaluierer
-from datenaugementierung import augment_data
 from sklearn.model_selection import KFold
-import pickle
-import json
 import sys
 import warnings
 from pprint import pprint
-import numpy as np
 import wandb
-import pandas as pd
 from caching import mem
-from sklearn.metrics import plot_confusion_matrix
-from matplotlib import pyplot as plt
 from average_calculater import calculate_average
 from average_calculater import calculate_conf_average
 from average_calculater import calculate_average_report
@@ -31,16 +24,16 @@ from average_calculater import calculate_average_report
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
-configuration = {
-    "fasttext_zusatzdaten": True,
-    "meta_zusatzdaten" : True,
-    "selbstständige" : "ohne",
-    "oesch" : "oesch16",
+DEFAULT_CONFIG = {
+    "fasttext_zusatzdaten": False,
+    "meta_zusatzdaten" : False,
+    "selbstständige" : "nur",
+    "oesch" : "oesch8",
     "lowercase" : False,
     "remove_stopwords": False,
     "remove_numbers": False,
     "remove_punctuation": False,
-    "keyboard_aug" : True,
+    "keyboard_aug" : False,
     "random_seed": 42,
     "path_welle1": "./Daten/welle1_und_3.csv",
     "path_welle2": "./Daten/wic_beruf-w2_data.csv",
@@ -48,12 +41,10 @@ configuration = {
     "path_wb": "./Wörterbücher/wic_wörterbuch_aufbereitet_oesch.csv",
     "path_pretrained_fasttext_model": "cc.de.300.bin",
     "k_fold_splits": 10,
-    "ft_model": "nn",
-    "meta_model": "nn",
-    "combi_model": "nn" # "xgboost" oder "nn" oder "linear"
+    "ft_model": "linear",
+    "meta_model": "linear",
+    "combi_model": "linear" # "xgboost" oder "nn" oder "linear"
 }
-
-run = wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration, name=f"{configuration['oesch']} {configuration['selbstständige']} {configuration['combi_model']} alle Daten")
 
 # caching funktion zur Datensatzerstellung
 @mem.cache
@@ -65,8 +56,9 @@ def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
 
     return fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z
 
-if __name__ == "__main__":
-
+def main(configuration):
+    run = wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration,
+                     name=f"{configuration['oesch']} {configuration['selbstständige']} {configuration['combi_model']} basic")
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
 
     # Todo: aufzeichnen wieviel prozent der Daten durch cleaning rausgechmissen werden, jeweils für wörterbuch und welle 1 daten
@@ -101,14 +93,12 @@ if __name__ == "__main__":
         X_train_meta, y_train_meta, X_test_meta, y_test_meta = \
             PS_Datengenerierer.make_ps_data_meta(X_meta, y_meta, X_meta_z, y_meta_z, configuration, train_index, test_index)
 
-
         print("Gesamtanzahl Datenpunkte Grunddaten vor k-split = ", len(fasttext_df))
         print("Anzahl Trainingsdaten ohne Zusatzdaten", len(fasttext_df)-len(X_test_fasttext))
         print("Anzahl Fasttext Trainingsdaten inklusive Zusatzdaten", len(X_train_fasttext))
         print("Anzahl fasttext Validierungsdaten = ", len(X_test_fasttext))
         print("Anzahl meta Trainingsdaten inklusive Zusatzdaten = ", len(X_train_meta))
         print("Anzahl meta Validierungsdaten = ", len(X_test_meta))
-
 
         print("trainiere meta Modell")
 
@@ -119,9 +109,6 @@ if __name__ == "__main__":
         meta_ergebnisse_train.append(evaluation_meta_train)
         meta_ergebnisse_val.append(evaluation_meta_val)
 
-        #print("Meta Modell: ")
-        #(evaluation_meta)
-
         print("trainiere fasttext Modell")
         fasttext_model = train_ft(X_train_fasttext, y_train_fasttext, configuration)
         evaluation_fasttext, evaluation_fasttext_train, evaluation_fasttext_val = Evaluierer.make_evaluation(fasttext_model, X_train_fasttext, y_train_fasttext,
@@ -129,9 +116,6 @@ if __name__ == "__main__":
         ft_ergebnisse.append(evaluation_fasttext)
         ft_ergebnisse_train.append(evaluation_fasttext_train)
         ft_ergebnisse_val.append(evaluation_fasttext_val)
-
-        #pprint("Fasttext Modell: ")
-        #pprint(evaluation_fasttext)
 
         X_train_combi, y_train_combi, X_test_combi, y_test_combi = \
             PS_Datengenerierer.make_ps_data_combi(fasttext_df, X_meta, fasttext_model, meta_model, train_index, test_index, configuration)
@@ -145,17 +129,13 @@ if __name__ == "__main__":
         combi_ergebnisse_train.append(evaluation_combi_train)
         combi_ergebnisse_val.append(evaluation_combi_val)
 
-       # pprint("Combi Modell evaluation: ")
-        #pprint(evaluation_combi)
         evaluation_combi_confidence = []
         for confidence in [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,0.992,0.994,0.995, 0.996, 0.997, 0.998]:
             evaluation_combi_confidence.append(Evaluierer.make_evaluation_confidence(combi_model, X_train_combi, y_train_combi, X_test_combi, y_test_combi, confidence, run=i))
         combi_conf_ergebnisse.append(evaluation_combi_confidence)
-        #ergebnisse.append({"meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi, "combi_confidence": evaluation_combi_confidence})
-        #wandb.log({"cross validation Durchgang": i, "meta":evaluation_meta, "fasttext": evaluation_fasttext, "combi": evaluation_combi, "combi_confidence": evaluation_combi_confidence})
 
-        zeit = round(time.time() - start_time, 2)
-        wandb.log({f"Dauer Durchlauf {i}: ": zeit})
+        zeit = round(time.time() - start_time) / 60
+        wandb.log({f"Dauer Durchlauf {i}min: ": zeit})
         i = i+1
 
     # hier berechne ich die averages von den einzelnen modell-evaluationen und speicher diese weg, diese sind das wichtigste für meine Auswertung
@@ -185,23 +165,83 @@ if __name__ == "__main__":
     wandb.log({"combi model validation average performance": combi_val_average})
 
     wandb.log({"combi confidence model average performance": combi_conf_average})
-    wandb.log({"Gesamtanzahl Datenpunkte Grunddaten vor k-split = ", len(fasttext_df),
-               "Anzahl Trainingsdaten ohne Zusatzdaten", len(fasttext_df) - len(X_test_fasttext),
-               "Anzahl Fasttext Trainingsdaten inklusive Zusatzdaten", len(X_train_fasttext),
-               "Anzahl fasttext Validierungsdaten = ", len(X_test_fasttext),
-               "Anzahl meta Trainingsdaten inklusive Zusatzdaten = ", len(X_train_meta),
-               "Anzahl meta Validierungsdaten = ", len(X_test_meta)})
+    wandb.log({"Gesamtanzahl Datenpunkte Grunddaten vor k-split = ": len(fasttext_df),
+               "Anzahl Trainingsdaten ohne Zusatzdaten": len(fasttext_df) - len(X_test_fasttext),
+               "Anzahl Fasttext Trainingsdaten inklusive Zusatzdaten": len(X_train_fasttext),
+               "Anzahl fasttext Validierungsdaten = ": len(X_test_fasttext),
+               "Anzahl meta Trainingsdaten inklusive Zusatzdaten = ": len(X_train_meta),
+               "Anzahl meta Validierungsdaten = ": len(X_test_meta)})
 
     pprint(meta_average)
     pprint(ft_average)
     pprint(combi_average)
-    pprint(meta_train_average)
-    pprint(ft_train_average)
-    pprint(combi_train_average)
-    pprint(meta_val_average)
-    pprint(ft_val_average)
-    pprint(combi_val_average)
     pprint(combi_conf_average)
 
     run.finish()
-    #pprint(ergebnisse)
+
+if __name__ == '__main__':
+    experiments= [
+        {},
+        {
+            "ft_model": "nn",
+            "meta_model": "nn",
+            "combi_model": "nn"
+        },
+        {
+            "ft_model": "xgboost",
+            "meta_model": "xgboost",
+            "combi_model": "xgboost"
+        },
+        {
+            "oesch": "oesch16"
+        },
+        {
+            "oesch": "oesch16",
+            "ft_model": "nn",
+            "meta_model": "nn",
+            "combi_model": "nn"
+        },
+        {
+            "oesch": "oesch16",
+            "ft_model": "xgboost",
+            "meta_model": "xgboost",
+            "combi_model": "xgboost"
+        },
+        {
+            "selbstständige": "ohne"
+        },
+        {
+            "selbstständige": "ohne",
+            "ft_model": "nn",
+            "meta_model": "nn",
+            "combi_model": "nn"
+        },
+        {
+            "selbstständige": "ohne",
+            "ft_model": "xgboost",
+            "meta_model": "xgboost",
+            "combi_model": "xgboost"
+        },
+        {
+            "selbstständige": "ohne",
+            "oesch": "oesch16"
+        },
+        {
+            "selbstständige": "ohne",
+            "oesch": "oesch16",
+            "ft_model": "nn",
+            "meta_model": "nn",
+            "combi_model": "nn"
+        },
+        {
+            "selbstständige": "ohne",
+            "oesch": "oesch16",
+            "ft_model": "xgboost",
+            "meta_model": "xgboost",
+            "combi_model": "xgboost"
+        }
+    ]
+    for exp in tqdm(experiments):
+        current_config = deepcopy(DEFAULT_CONFIG)
+        current_config.update(exp)
+        main(current_config)
