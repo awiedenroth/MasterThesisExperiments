@@ -25,10 +25,11 @@ if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 DEFAULT_CONFIG = {
+    "name": "basic",
     "fasttext_zusatzdaten": False,
     "meta_zusatzdaten" : False,
-    "selbstständige" : "nur",
-    "oesch" : "oesch8",
+    "selbstständige" : "ohne",
+    "oesch" : "oesch16",
     "lowercase" : False,
     "remove_stopwords": False,
     "remove_numbers": False,
@@ -41,9 +42,9 @@ DEFAULT_CONFIG = {
     "path_wb": "./Wörterbücher/wic_wörterbuch_aufbereitet_oesch.csv",
     "path_pretrained_fasttext_model": "cc.de.300.bin",
     "k_fold_splits": 10,
-    "ft_model": "linear",
-    "meta_model": "linear",
-    "combi_model": "linear" # "xgboost" oder "nn" oder "linear"
+    "ft_model": "xgboost",
+    "meta_model": "xgboost",
+    "combi_model": "xgboost" # "xgboost" oder "nn" oder "linear"
 }
 
 # caching funktion zur Datensatzerstellung
@@ -58,7 +59,7 @@ def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
 
 def main(configuration):
     run = wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration,
-                     name=f"{configuration['oesch']} {configuration['selbstständige']} {configuration['combi_model']} basic")
+                     name=f"{configuration['oesch']} {configuration['selbstständige']} {configuration['combi_model']} {configuration['name']}")
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
 
     # Todo: aufzeichnen wieviel prozent der Daten durch cleaning rausgechmissen werden, jeweils für wörterbuch und welle 1 daten
@@ -188,59 +189,75 @@ if __name__ == '__main__':
             "combi_model": "nn"
         },
         {
-            "ft_model": "xgboost",
-            "meta_model": "xgboost",
-            "combi_model": "xgboost"
+            "ft_model": "linear",
+            "meta_model": "linear",
+            "combi_model": "linear"
         },
         {
-            "oesch": "oesch16"
+            "oesch": "oesch8"
         },
         {
-            "oesch": "oesch16",
+            "oesch": "oesch8",
             "ft_model": "nn",
             "meta_model": "nn",
             "combi_model": "nn"
         },
         {
-            "oesch": "oesch16",
-            "ft_model": "xgboost",
-            "meta_model": "xgboost",
-            "combi_model": "xgboost"
+            "oesch": "oesch8",
+            "ft_model": "linear",
+            "meta_model": "linear",
+            "combi_model": "linear"
         },
         {
-            "selbstständige": "ohne"
+            "selbstständige": "nur"
         },
         {
-            "selbstständige": "ohne",
+            "selbstständige": "nur",
             "ft_model": "nn",
             "meta_model": "nn",
             "combi_model": "nn"
         },
         {
-            "selbstständige": "ohne",
-            "ft_model": "xgboost",
-            "meta_model": "xgboost",
-            "combi_model": "xgboost"
+            "selbstständige": "nur",
+            "ft_model": "linear",
+            "meta_model": "linear",
+            "combi_model": "linear"
         },
         {
-            "selbstständige": "ohne",
-            "oesch": "oesch16"
+            "selbstständige": "nur",
+            "oesch": "oesch8"
         },
         {
-            "selbstständige": "ohne",
-            "oesch": "oesch16",
+            "selbstständige": "nur",
+            "oesch": "oesch8",
             "ft_model": "nn",
             "meta_model": "nn",
             "combi_model": "nn"
         },
         {
-            "selbstständige": "ohne",
-            "oesch": "oesch16",
-            "ft_model": "xgboost",
-            "meta_model": "xgboost",
-            "combi_model": "xgboost"
+            "selbstständige": "nur",
+            "oesch": "oesch8",
+            "ft_model": "linear",
+            "meta_model": "linear",
+            "combi_model": "linear"
         }
     ]
+    """
+    experiments = [
+        {
+            "name": "keyboard_augmentation",
+            "keyboard_aug": True
+        },
+        {
+            "name": "wörterbuch",
+            "fasttext_zusatzdaten": True
+        },
+        {
+            "name": "meta_zusatzdaten",
+            "meta_zusatzdaten": True
+        }
+    ]
+    """
     for exp in tqdm(experiments):
         current_config = deepcopy(DEFAULT_CONFIG)
         current_config.update(exp)
