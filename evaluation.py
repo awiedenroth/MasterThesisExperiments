@@ -116,40 +116,42 @@ class Evaluierer:
                 y_train_clean.append(y_train)
             else:
                 deleted += 1
+        if len(y_train_clean) > 1:
+            y_train_pred = model.predict(np.asarray(X_train_clean))
+            y_train = np.asarray(y_train_clean)
 
-        y_train_pred = model.predict(np.asarray(X_train_clean))
-        y_train = np.asarray(y_train_clean)
+            total_val = len(X_val)
+            deleted_val = 0
+            X_val_clean = []
+            y_val_clean = []
+            for X_val, y_val, y_val_pred_proba in zip(X_val,y_val,y_val_pred_proba):
 
-        total_val = len(X_val)
-        deleted_val = 0
-        X_val_clean = []
-        y_val_clean = []
-        for X_val, y_val, y_val_pred_proba in zip(X_val,y_val,y_val_pred_proba):
+                if max(y_val_pred_proba) > confidence:
+                    X_val_clean.append(X_val)
+                    y_val_clean.append(y_val)
 
-            if max(y_val_pred_proba) > confidence:
-                X_val_clean.append(X_val)
-                y_val_clean.append(y_val)
+                else:
+                    deleted_val += 1
 
+            if len(y_val_clean) > 1:
+                y_val_pred = model.predict(np.asarray(X_val_clean))
+                y_val = np.asarray(y_val_clean)
+
+
+                result = {}
+                result[f"confidence: "] = confidence
+                result[f"deleted datapoints @{confidence}: "] = deleted
+                result[f"percentage deleted train @{confidence}: "] = deleted/total
+                result[f"train accuracy @{confidence}: "] = accuracy_score(y_train, y_train_pred)
+                result[f"train balanced acc @{confidence}: "] = balanced_accuracy_score(y_train, y_train_pred)
+                result[f"train balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_train, y_train_pred, adjusted=True)
+                result[f"deleted datapoints val @{confidence}: "] = deleted_val
+                result[f"percentage deleted val @{confidence}: "] = deleted_val / total_val
+                result[f"validation accuracy @{confidence}: "] = accuracy_score(y_val, y_val_pred)
+                result[f"validation balanced acc @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred)
+                result[f"validation balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred, adjusted=True)
             else:
-                deleted_val += 1
-
-        if len(y_val_clean) > 1:
-            y_val_pred = model.predict(np.asarray(X_val_clean))
-            y_val = np.asarray(y_val_clean)
-
-
-            result = {}
-            result[f"confidence: "] = confidence
-            result[f"deleted datapoints @{confidence}: "] = deleted
-            result[f"percentage deleted train @{confidence}: "] = deleted/total
-            result[f"train accuracy @{confidence}: "] = accuracy_score(y_train, y_train_pred)
-            result[f"train balanced acc @{confidence}: "] = balanced_accuracy_score(y_train, y_train_pred)
-            result[f"train balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_train, y_train_pred, adjusted=True)
-            result[f"deleted datapoints val @{confidence}: "] = deleted_val
-            result[f"percentage deleted val @{confidence}: "] = deleted_val / total_val
-            result[f"validation accuracy @{confidence}: "] = accuracy_score(y_val, y_val_pred)
-            result[f"validation balanced acc @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred)
-            result[f"validation balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred, adjusted=True)
+                result = {"confidence: ": confidence, f"percentage deleted val @{confidence}: ": "100%"}
         else:
             result = {"confidence: " : confidence, f"percentage deleted val @{confidence}: ": "100%"}
 

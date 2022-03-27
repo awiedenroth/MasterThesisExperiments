@@ -31,7 +31,7 @@ DEFAULT_CONFIG = {
     "fasttext_zusatzdaten": False,
     "meta_zusatzdaten" : False,
     "selbstständige" : "ohne",
-    "oesch" : "oesch16",
+    "oesch" : "oesch8",
     "lowercase" : False,
     "remove_stopwords": False,
     "remove_numbers": False,
@@ -44,9 +44,9 @@ DEFAULT_CONFIG = {
     "path_wb": "./Wörterbücher/wic_wörterbuch_aufbereitet_oesch.csv",
     "path_pretrained_fasttext_model": "cc.de.300.bin",
     "k_fold_splits": 10,
-    "ft_model": "xgboost",
-    "meta_model": "xgboost",
-    "combi_model": "xgboost" # "xgboost" oder "nn" oder "linear"
+    "ft_model": "nn",
+    "meta_model": "nn",
+    "combi_model": "nn" # "xgboost" oder "nn" oder "linear"
 }
 
 # caching funktion zur Datensatzerstellung
@@ -183,6 +183,7 @@ def main(configuration):
     run.finish()
 
 if __name__ == '__main__':
+    """
     experiments= [
        # {},
        # {
@@ -210,15 +211,15 @@ if __name__ == '__main__':
        #     "meta_model": "linear",
        #     "combi_model": "linear"
        # },
-        {
-            "selbstständige": "nur"
-        },
-        {
-            "selbstständige": "nur",
-            "ft_model": "nn",
-            "meta_model": "nn",
-            "combi_model": "nn"
-        },
+       # {
+       #     "selbstständige": "nur"
+       # },
+       # {
+       #     "selbstständige": "nur",
+       #     "ft_model": "nn",
+       #     "meta_model": "nn",
+       #     "combi_model": "nn"
+       # },
         {
             "selbstständige": "nur",
             "ft_model": "linear",
@@ -259,7 +260,7 @@ if __name__ == '__main__':
             "meta_zusatzdaten": True
         }
     ]
-    """
+
     for exp in tqdm(experiments):
         current_config = deepcopy(DEFAULT_CONFIG)
         current_config.update(exp)
