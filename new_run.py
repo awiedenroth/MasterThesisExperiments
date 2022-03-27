@@ -1,6 +1,8 @@
 from copy import deepcopy
 from typing import Union, Dict, Any
 import time
+
+from networkx.drawing.tests.test_pylab import plt
 from tqdm import tqdm
 from postsplit_datengenerierung import PS_Datengenerierer
 from presplit_datengenerierung import Datengenerierer
@@ -58,7 +60,7 @@ def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
     return fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z
 
 def main(configuration):
-    run = wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration,
+    run = wandb.init(project="Masterarbeit", entity="awiedenroth", config=configuration, 
                      name=f"{configuration['oesch']} {configuration['selbstständige']} {configuration['combi_model']} {configuration['name']}")
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
 
@@ -182,32 +184,32 @@ def main(configuration):
 
 if __name__ == '__main__':
     experiments= [
-        {},
-        {
-            "ft_model": "nn",
-            "meta_model": "nn",
-            "combi_model": "nn"
-        },
-        {
-            "ft_model": "linear",
-            "meta_model": "linear",
-            "combi_model": "linear"
-        },
-        {
-            "oesch": "oesch8"
-        },
-        {
-            "oesch": "oesch8",
-            "ft_model": "nn",
-            "meta_model": "nn",
-            "combi_model": "nn"
-        },
-        {
-            "oesch": "oesch8",
-            "ft_model": "linear",
-            "meta_model": "linear",
-            "combi_model": "linear"
-        },
+       # {},
+       # {
+       #     "ft_model": "nn",
+       #     "meta_model": "nn",
+       #     "combi_model": "nn"
+       # },
+       # {
+       #     "ft_model": "linear",
+       #     "meta_model": "linear",
+       #     "combi_model": "linear"
+       # },
+       # {
+       #     "oesch": "oesch8"
+       # },
+       # {
+       #     "oesch": "oesch8",
+       #     "ft_model": "nn",
+       #     "meta_model": "nn",
+       #     "combi_model": "nn"
+       # },
+       # {
+       #     "oesch": "oesch8",
+       #     "ft_model": "linear",
+       #     "meta_model": "linear",
+       #     "combi_model": "linear"
+       # },
         {
             "selbstständige": "nur"
         },
@@ -262,3 +264,5 @@ if __name__ == '__main__':
         current_config = deepcopy(DEFAULT_CONFIG)
         current_config.update(exp)
         main(current_config)
+        plt.clf()
+        plt.cla()
