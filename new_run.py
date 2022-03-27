@@ -31,7 +31,7 @@ DEFAULT_CONFIG = {
     "fasttext_zusatzdaten": False,
     "meta_zusatzdaten" : False,
     "selbstständige" : "ohne",
-    "oesch" : "oesch8",
+    "oesch" : "oesch16",
     "lowercase" : False,
     "remove_stopwords": False,
     "remove_numbers": False,
@@ -45,8 +45,8 @@ DEFAULT_CONFIG = {
     "path_pretrained_fasttext_model": "cc.de.300.bin",
     "k_fold_splits": 10,
     "ft_model": "nn",
-    "meta_model": "nn",
-    "combi_model": "nn" # "xgboost" oder "nn" oder "linear"
+    "meta_model": "xgboost",
+    "combi_model": "xgboost" # "xgboost" oder "nn" oder "linear"
 }
 
 # caching funktion zur Datensatzerstellung
@@ -183,66 +183,59 @@ def main(configuration):
     run.finish()
 
 if __name__ == '__main__':
-    """
+
     experiments= [
-       # {},
-       # {
-       #     "ft_model": "nn",
-       #     "meta_model": "nn",
-       #     "combi_model": "nn"
-       # },
-       # {
-       #     "ft_model": "linear",
-       #     "meta_model": "linear",
-       #     "combi_model": "linear"
-       # },
-       # {
-       #     "oesch": "oesch8"
-       # },
-       # {
-       #     "oesch": "oesch8",
-       #     "ft_model": "nn",
-       #     "meta_model": "nn",
-       #     "combi_model": "nn"
-       # },
-       # {
-       #     "oesch": "oesch8",
-       #     "ft_model": "linear",
-       #     "meta_model": "linear",
-       #     "combi_model": "linear"
-       # },
-       # {
-       #     "selbstständige": "nur"
-       # },
-       # {
-       #     "selbstständige": "nur",
-       #     "ft_model": "nn",
-       #     "meta_model": "nn",
-       #     "combi_model": "nn"
-       # },
         {
-            "selbstständige": "nur",
-            "ft_model": "linear",
-            "meta_model": "linear",
-            "combi_model": "linear"
-        },
-        {
-            "selbstständige": "nur",
-            "oesch": "oesch8"
-        },
-        {
-            "selbstständige": "nur",
             "oesch": "oesch8",
+            "selbstständige": "ohne",
             "ft_model": "nn",
             "meta_model": "nn",
-            "combi_model": "nn"
+            "combi_model": "nn",
+            "name": "meta_zusatzdaten",
+            "meta_zusatzdaten": True
+        },
+        {
+            "oesch": "oesch8",
+            "selbstständige": "ohne",
+            "ft_model": "xgboost",
+            "meta_model": "xgboost",
+            "combi_model": "xgboost",
+            "name": "keyboard_augmentation",
+            "keyboard_aug": True
+        },
+        {
+            "oesch": "oesch8",
+            "selbstständige": "ohne",
+            "ft_model": "nn",
+            "meta_model": "nn",
+            "combi_model": "nn",
+            "name": "wörterbuch",
+            "fasttext_zusatzdaten": True
+        },
+        {
+            "oesch": "oesch8",
+            "selbstständige": "ohne",
+            "ft_model": "nn",
+            "meta_model": "nn",
+            "combi_model": "nn",
+            "name": "meta_zusatzdaten",
+            "meta_zusatzdaten": True
+        },
+        {
+            "name": "ft_nn"
+        },
+        {
+            "selbstständige": "nur",
+            "name": "ft_nn"
         },
         {
             "selbstständige": "nur",
             "oesch": "oesch8",
-            "ft_model": "linear",
-            "meta_model": "linear",
-            "combi_model": "linear"
+            "name": "ft_nn"
+        },
+        {
+            "oesch": "oesch8",
+            "name": "ft_nn"
         }
     ]
     """
@@ -259,7 +252,7 @@ if __name__ == '__main__':
             "name": "meta_zusatzdaten",
             "meta_zusatzdaten": True
         }
-    ]
+    ]"""
 
     for exp in tqdm(experiments):
         current_config = deepcopy(DEFAULT_CONFIG)
