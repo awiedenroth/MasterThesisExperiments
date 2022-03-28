@@ -46,7 +46,7 @@ DEFAULT_CONFIG = {
     "k_fold_splits": 10,
     "ft_model": "nn",
     "meta_model": "xgboost",
-    "combi_model": "xgboost" # "xgboost" oder "nn" oder "linear"
+    "combi_model": "nn" # "xgboost" oder "nn" oder "linear"
 }
 
 # caching funktion zur Datensatzerstellung
@@ -188,11 +188,11 @@ if __name__ == '__main__':
         {
             "oesch": "oesch8",
             "selbstständige": "ohne",
-            "ft_model": "nn",
-            "meta_model": "nn",
-            "combi_model": "nn",
-            "name": "meta_zusatzdaten",
-            "meta_zusatzdaten": True
+            "ft_model": "xgboost",
+            "meta_model": "xgboost",
+            "combi_model": "xgboost",
+            "name": "wörterbuch",
+            "fasttext_zusatzdaten": True
         },
         {
             "oesch": "oesch8",
@@ -200,42 +200,44 @@ if __name__ == '__main__':
             "ft_model": "xgboost",
             "meta_model": "xgboost",
             "combi_model": "xgboost",
-            "name": "keyboard_augmentation",
-            "keyboard_aug": True
-        },
-        {
-            "oesch": "oesch8",
-            "selbstständige": "ohne",
-            "ft_model": "nn",
-            "meta_model": "nn",
-            "combi_model": "nn",
-            "name": "wörterbuch",
-            "fasttext_zusatzdaten": True
-        },
-        {
-            "oesch": "oesch8",
-            "selbstständige": "ohne",
-            "ft_model": "nn",
-            "meta_model": "nn",
-            "combi_model": "nn",
             "name": "meta_zusatzdaten",
             "meta_zusatzdaten": True
         },
         {
-            "name": "ft_nn"
+            "name": "meta_xgboost"
         },
         {
             "selbstständige": "nur",
-            "name": "ft_nn"
+            "name": "meta_xgboost"
         },
         {
             "selbstständige": "nur",
             "oesch": "oesch8",
-            "name": "ft_nn"
+            "name": "meta_xgboost"
         },
         {
             "oesch": "oesch8",
-            "name": "ft_nn"
+            "name": "meta_xgboost"
+        },
+        {
+            "name": "meta_xgboost",
+            "keyboard_aug": True
+        },
+        {
+            "selbstständige": "nur",
+            "name": "meta_xgboost",
+            "keyboard_aug": True
+        },
+        {
+            "selbstständige": "nur",
+            "oesch": "oesch8",
+            "name": "meta_xgboost",
+            "keyboard_aug": True
+        },
+        {
+            "oesch": "oesch8",
+            "name": "meta_xgboost",
+            "keyboard_aug": True
         }
     ]
     """
