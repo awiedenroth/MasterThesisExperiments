@@ -68,8 +68,10 @@ class Evaluierer:
         result_train = classification_report(y_train, y_train_pred, labels=labels, output_dict=True, zero_division=0)
         result_val = classification_report(y_val, y_val_pred, labels=labels, output_dict=True, zero_division=0)
 
-        result_train.pop("accuracy")
-        result_val.pop("accuracy")
+        if "accuracy" in result_train:
+            result_train.pop("accuracy")
+        if "accuracy" in result_val:
+            result_val.pop("accuracy")
 
         #report= wandb.Table(columns=result_train.keys(), data=result_train.values())
 

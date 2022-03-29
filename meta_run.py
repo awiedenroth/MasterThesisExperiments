@@ -27,7 +27,6 @@ if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 DEFAULT_CONFIG = {
-    "name": "basic",
     "fasttext_zusatzdaten": False,
     "meta_zusatzdaten" : False,
     "selbstständige" : "ohne",
@@ -60,26 +59,26 @@ def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
     return fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z
 
 def main():
-    run = wandb.init(project="Masterarbeit_ft", entity="awiedenroth")
+    run = wandb.init(project="Masterarbeit_meta", entity="awiedenroth")
     print(wandb.config)
-    configuration = {k: v for k, v in wandb.config.items()}
+    configuration = {k:v for k,v in wandb.config.items()}
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
 
     # Todo: aufzeichnen wieviel prozent der Daten durch cleaning rausgechmissen werden, jeweils für wörterbuch und welle 1 daten
-    fasttext_df = clean_data(fasttext_df, configuration)
-    if configuration["fasttext_zusatzdaten"] == True and configuration["selbstständige"] == "ohne":
-        fasttext_wb_df = clean_data(fasttext_wb_df, configuration)
-        fasttext_wb_df = remove_duplicates(fasttext_wb_df, configuration)
+    #fasttext_df = clean_data(fasttext_df, configuration)
+    #if configuration["fasttext_zusatzdaten"] == True and configuration["selbstständige"] == "ohne":
+    #    fasttext_wb_df = clean_data(fasttext_wb_df, configuration)
+    #    fasttext_wb_df = remove_duplicates(fasttext_wb_df, configuration)
     #dict zum abspeichern der ergebnisse
     ergebnisse = []
-    #meta_ergebnisse = []
-    ft_ergebnisse = []
+    meta_ergebnisse = []
+    #ft_ergebnisse = []
     #combi_ergebnisse = []
-    #meta_ergebnisse_train = []
-    ft_ergebnisse_train = []
+    meta_ergebnisse_train = []
+    #ft_ergebnisse_train = []
     #combi_ergebnisse_train = []
-    #meta_ergebnisse_val = []
-    ft_ergebnisse_val = []
+    meta_ergebnisse_val = []
+    #ft_ergebnisse_val = []
     #combi_ergebnisse_val = []
     #combi_conf_ergebnisse = []
     # index um zu tracken bei welchem durchgang man ist
@@ -91,29 +90,29 @@ def main():
         start_time = time.time()
         print("Durchgang ", i)
 
-        X_train_fasttext, y_train_fasttext, X_test_fasttext, y_test_fasttext = \
-            PS_Datengenerierer.make_ps_data_ft(fasttext_df, fasttext_wb_df, configuration, train_index, test_index)
+        #X_train_fasttext, y_train_fasttext, X_test_fasttext, y_test_fasttext = \
+           # PS_Datengenerierer.make_ps_data_ft(fasttext_df, fasttext_wb_df, configuration, train_index, test_index)
 
         X_train_meta, y_train_meta, X_test_meta, y_test_meta = \
             PS_Datengenerierer.make_ps_data_meta(X_meta, y_meta, X_meta_z, y_meta_z, configuration, train_index, test_index)
 
         print("Gesamtanzahl Datenpunkte Grunddaten vor k-split = ", len(fasttext_df))
-        print("Anzahl Trainingsdaten ohne Zusatzdaten", len(fasttext_df)-len(X_test_fasttext))
-        print("Anzahl Fasttext Trainingsdaten inklusive Zusatzdaten", len(X_train_fasttext))
-        print("Anzahl fasttext Validierungsdaten = ", len(X_test_fasttext))
+        #print("Anzahl Trainingsdaten ohne Zusatzdaten", len(fasttext_df)-len(X_test_fasttext))
+       # print("Anzahl Fasttext Trainingsdaten inklusive Zusatzdaten", len(X_train_fasttext))
+        #print("Anzahl fasttext Validierungsdaten = ", len(X_test_fasttext))
         print("Anzahl meta Trainingsdaten inklusive Zusatzdaten = ", len(X_train_meta))
         print("Anzahl meta Validierungsdaten = ", len(X_test_meta))
 
-        #print("trainiere meta Modell")
+        print("trainiere meta Modell")
 
-        #meta_model = train_meta(X_train_meta, y_train_meta, configuration)
-        #evaluation_meta, evaluation_meta_train, evaluation_meta_val = Evaluierer.make_evaluation(meta_model, X_train_meta, y_train_meta,
-        #                                                 X_test_meta, y_test_meta, configuration, modelname = "meta", run = i)
-        #meta_ergebnisse.append(evaluation_meta)
-        #meta_ergebnisse_train.append(evaluation_meta_train)
-        #meta_ergebnisse_val.append(evaluation_meta_val)
+        meta_model = train_meta(X_train_meta, y_train_meta, configuration)
+        evaluation_meta, evaluation_meta_train, evaluation_meta_val = Evaluierer.make_evaluation(meta_model, X_train_meta, y_train_meta,
+                                                         X_test_meta, y_test_meta, configuration, modelname = "meta", run = i)
+        meta_ergebnisse.append(evaluation_meta)
+        meta_ergebnisse_train.append(evaluation_meta_train)
+        meta_ergebnisse_val.append(evaluation_meta_val)
 
-        print("trainiere fasttext Modell")
+        """ print("trainiere fasttext Modell")
         fasttext_model = train_ft(X_train_fasttext, y_train_fasttext, configuration)
         evaluation_fasttext, evaluation_fasttext_train, evaluation_fasttext_val = Evaluierer.make_evaluation(fasttext_model, X_train_fasttext, y_train_fasttext,
                                    X_test_fasttext, y_test_fasttext, configuration, modelname = "fasttext", run = i)
@@ -121,64 +120,63 @@ def main():
         ft_ergebnisse_train.append(evaluation_fasttext_train)
         ft_ergebnisse_val.append(evaluation_fasttext_val)
 
-        #X_train_combi, y_train_combi, X_test_combi, y_test_combi = \
-          #  PS_Datengenerierer.make_ps_data_combi(fasttext_df, X_meta, fasttext_model, meta_model, train_index, test_index, configuration)
+        X_train_combi, y_train_combi, X_test_combi, y_test_combi = \
+            PS_Datengenerierer.make_ps_data_combi(fasttext_df, X_meta, fasttext_model, meta_model, train_index, test_index, configuration)
 
-        #print("trainiere Combi Modell")
+        print("trainiere Combi Modell")
 
-        #combi_model = train_combi(X_train_combi, y_train_combi, configuration)
-        #evaluation_combi, evaluation_combi_train, evaluation_combi_val = Evaluierer.make_evaluation(combi_model, X_train_combi, y_train_combi,
-        #                                                X_test_combi, y_test_combi, configuration, modelname = "combi", run = i)
-        #combi_ergebnisse.append(evaluation_combi)
-        #combi_ergebnisse_train.append(evaluation_combi_train)
-        #combi_ergebnisse_val.append(evaluation_combi_val)
+        combi_model = train_combi(X_train_combi, y_train_combi, configuration)
+        evaluation_combi, evaluation_combi_train, evaluation_combi_val = Evaluierer.make_evaluation(combi_model, X_train_combi, y_train_combi,
+                                                         X_test_combi, y_test_combi, configuration, modelname = "combi", run = i)
+        combi_ergebnisse.append(evaluation_combi)
+        combi_ergebnisse_train.append(evaluation_combi_train)
+        combi_ergebnisse_val.append(evaluation_combi_val)
 
-        #evaluation_combi_confidence = []
-        #for confidence in [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,0.992,0.994,0.995, 0.996, 0.997, 0.998]:
-        #    evaluation_combi_confidence.append(Evaluierer.make_evaluation_confidence(combi_model, X_train_combi, y_train_combi, X_test_combi, y_test_combi, confidence, run=i))
-        #combi_conf_ergebnisse.append(evaluation_combi_confidence)
-
+        evaluation_combi_confidence = []
+        for confidence in [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,0.992,0.994,0.995, 0.996, 0.997, 0.998]:
+            evaluation_combi_confidence.append(Evaluierer.make_evaluation_confidence(combi_model, X_train_combi, y_train_combi, X_test_combi, y_test_combi, confidence, run=i))
+        combi_conf_ergebnisse.append(evaluation_combi_confidence)
+        """
         zeit = round(time.time() - start_time) / 60
         wandb.log({f"Dauer Durchlauf {i}min: ": zeit})
         i = i+1
 
     # hier berechne ich die averages von den einzelnen modell-evaluationen und speicher diese weg, diese sind das wichtigste für meine Auswertung
-    #meta_average = calculate_average(meta_ergebnisse)
-    ft_average = calculate_average(ft_ergebnisse)
+    meta_average = calculate_average(meta_ergebnisse)
+    #ft_average = calculate_average(ft_ergebnisse)
     #combi_average = calculate_average(combi_ergebnisse)
 
-    #meta_train_average = calculate_average_report(meta_ergebnisse_train)
-    ft_train_average = calculate_average_report(ft_ergebnisse_train)
+    meta_train_average = calculate_average_report(meta_ergebnisse_train)
+    #ft_train_average = calculate_average_report(ft_ergebnisse_train)
     #combi_train_average = calculate_average_report(combi_ergebnisse_train)
 
-    #meta_val_average = calculate_average_report(meta_ergebnisse_val)
-    ft_val_average = calculate_average_report(ft_ergebnisse_val)
+    meta_val_average = calculate_average_report(meta_ergebnisse_val)
+    #ft_val_average = calculate_average_report(ft_ergebnisse_val)
     #combi_val_average = calculate_average_report(combi_ergebnisse_val)
 
     #combi_conf_average = calculate_conf_average(combi_conf_ergebnisse)
-    #wandb.log({"meta model average performance": meta_average})
-    wandb.log({"fasttext model average performance": ft_average})
+    wandb.log({"meta model average performance": meta_average})
+    #wandb.log({"fasttext model average performance": ft_average})
     #wandb.log({"combi model average performance": combi_average})
 
-    #wandb.log({"meta model train average performance": meta_train_average})
-    wandb.log({"fasttext model train average performance": ft_train_average})
+    wandb.log({"meta model train average performance": meta_train_average})
+    #wandb.log({"fasttext model train average performance": ft_train_average})
     #wandb.log({"combi model train average performance": combi_train_average})
 
-    #wandb.log({"meta model validation average performance": meta_val_average})
-    wandb.log({"fasttext model validation average performance": ft_val_average})
+    wandb.log({"meta model validation average performance": meta_val_average})
+    #wandb.log({"fasttext model validation average performance": ft_val_average})
     #wandb.log({"combi model validation average performance": combi_val_average})
-
-   # wandb.log({"combi confidence model average performance": combi_conf_average})
+    """
+    wandb.log({"combi confidence model average performance": combi_conf_average})
     wandb.log({"Gesamtanzahl Datenpunkte Grunddaten vor k-split = ": len(fasttext_df),
                "Anzahl Trainingsdaten ohne Zusatzdaten": len(fasttext_df) - len(X_test_fasttext),
                "Anzahl Fasttext Trainingsdaten inklusive Zusatzdaten": len(X_train_fasttext),
                "Anzahl fasttext Validierungsdaten = ": len(X_test_fasttext),
-               #"Anzahl meta Trainingsdaten inklusive Zusatzdaten = ": len(X_train_meta),
-               #"Anzahl meta Validierungsdaten = ": len(X_test_meta)
-               })
-
-    #pprint(meta_average)
-    pprint(ft_average)
+               "Anzahl meta Trainingsdaten inklusive Zusatzdaten = ": len(X_train_meta),
+               "Anzahl meta Validierungsdaten = ": len(X_test_meta)})
+    """
+    pprint(meta_average)
+    #pprint(ft_average)
     #pprint(combi_average)
     #pprint(combi_conf_average)
     plt.clf()
