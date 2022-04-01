@@ -27,7 +27,6 @@ if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 DEFAULT_CONFIG = {
-    "name": "basic",
     "fasttext_zusatzdaten": False,
     "meta_zusatzdaten" : False,
     "selbstständige" : "ohne",
