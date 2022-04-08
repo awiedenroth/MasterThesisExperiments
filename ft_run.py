@@ -57,10 +57,11 @@ def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
     return fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z
 
 def main():
-    run = wandb.init(project="Masterarbeit_preliminaries", entity="awiedenroth")
-    print(wandb.config)
+    run = wandb.init(project="ft_oesch8_nur", entity="awiedenroth")
+    print("wandb says: ", wandb.config)
     #configuration = DEFAULT_CONFIG
     configuration = {k: v for k, v in wandb.config.items()}
+    print("actual conf:", configuration)
 
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
 
