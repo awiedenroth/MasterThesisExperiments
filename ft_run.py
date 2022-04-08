@@ -47,7 +47,7 @@ DEFAULT_CONFIG = {
 }
 
 # caching funktion zur Datensatzerstellung
-#@mem.cache
+@mem.cache
 def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
     # ich erzeuge für fasttext und meta jeweils die grunddaten
     fasttext_df, X_meta, y_meta = Datengenerierer.make_dataset(configuration)
