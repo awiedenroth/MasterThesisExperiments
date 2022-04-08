@@ -34,7 +34,8 @@ class PS_Datengenerierer:
             if configuration["selbstständige"] == "ohne":
                 X_train_fasttext = pd.concat([X_train_fasttext, fasttext_wb_df])
 
-        X_train_fasttext = augment_data(X_train_fasttext, configuration)
+        if configuration["keyboard_aug"] == True:
+            X_train_fasttext = augment_data(X_train_fasttext)
 
         # ich erzeuge aus training_df und test_df die embeddings bei den fasttext dingen und shuffle
         X_train_fasttext, y_train_fasttext = PS_Datengenerierer.finalize_data(X_train_fasttext, configuration, shuffle=True)

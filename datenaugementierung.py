@@ -13,13 +13,12 @@ import nlpaug.augmenter.word as naw
 import nlpaug.augmenter.sentence as nas
 from caching import mem
 
-@mem.cache
-def augment_data(df, config):
-    if config["keyboard_aug"] == True:
-        augmented_df = df.copy()
-        augmented_df["taetigk"] = augmented_df["taetigk"].apply(lambda x: keyboard_augmentation(x))
-        #augmented_df["embeddings"] = augmented_df["taetigk"].apply(ft.get_word_vector)
-        df = pd.concat([df, augmented_df])
+#@mem.cache
+def augment_data(df):
+    augmented_df = df.copy()
+    augmented_df["taetigk"] = augmented_df["taetigk"].apply(lambda x: keyboard_augmentation(x))
+    #augmented_df["embeddings"] = augmented_df["taetigk"].apply(ft.get_word_vector)
+    df = pd.concat([df, augmented_df])
 
     return df
 

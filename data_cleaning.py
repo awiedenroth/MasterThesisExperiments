@@ -22,17 +22,13 @@ string.punctuation
 @mem.cache
 def clean_data(fasttext_df, config):
 
-    if config["lowercase"] == True:
+    if config["remove_num_punc_low"] == True:
         fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: lowercase(x))
-
-    if config["remove_punctuation"] == True:
         fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: remove_punctuation(x))
+        fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: remove_numbers(x))
 
     if config["remove_stopwords"] == True:
         fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: remove_stopwords(x))
-
-    if config["remove_numbers"] == True:
-        fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: remove_numbers(x))
 
     return fasttext_df
 
@@ -54,8 +50,5 @@ def remove_punctuation(text):
     words_wo_punct=''.join(no_punct)
     return words_wo_punct
 
-def remove_duplicates(df, config):
-    df.drop_duplicates(subset=["taetigk", config["oesch"]], keep='first', inplace=True, ignore_index=True)
-    return df
 
 

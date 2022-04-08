@@ -77,8 +77,8 @@ class Evaluierer:
 
         #wandb.run.summary[f"{modelname} train run {run}"] = result_train
         #wandb.run.summary[f"{modelname} validation run {run}"] = result_val
-        wandb.log({f"{modelname} training report run {run}": result_train})
-        wandb.log({f"{modelname} validation report run {run}": result_val})
+        #wandb.log({f"{modelname} training report run {run}": result_train})
+        #wandb.log({f"{modelname} validation report run {run}": result_val})
 
 
 

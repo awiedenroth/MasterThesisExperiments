@@ -1,7 +1,6 @@
 import wandb
 import xgboost as xgb
 from wandb.xgboost import wandb_callback
-from caching import mem
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
 

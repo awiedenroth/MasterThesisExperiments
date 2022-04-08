@@ -8,7 +8,6 @@ from postsplit_datengenerierung import PS_Datengenerierer
 from presplit_datengenerierung import Datengenerierer
 from zusatzdatengenerierung import Zusatzdatengenerierer
 from data_cleaning import clean_data
-from data_cleaning import remove_duplicates
 from modelltraining import train_ft
 from modelltraining import train_meta
 from modelltraining import train_combi
@@ -27,20 +26,18 @@ if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 DEFAULT_CONFIG = {
-    "fasttext_zusatzdaten": False,
+    "fasttext_zusatzdaten": True,
     "meta_zusatzdaten" : False,
     "selbstständige" : "ohne",
-    "oesch" : "oesch16",
-    "lowercase" : False,
+    "oesch" : "oesch8",
     "remove_stopwords": False,
-    "remove_numbers": False,
-    "remove_punctuation": False,
-    "keyboard_aug" : False,
-    "random_seed": 42,
+    "remove_num_punc_low": False,
+    "keyboard_aug" : True,
+    "random_seed": 22,
     "path_welle1": "./Daten/welle1_und_3.csv",
     "path_welle2": "./Daten/wic_beruf-w2_data.csv",
     "path_welle3": "./Daten/wic_beruf-w4_data.csv",
-    "path_wb": "./Wörterbücher/wic_wörterbuch_aufbereitet_oesch.csv",
+    "path_wb": "./Wörterbücher/Wörterbuch_binär.csv",
     "path_pretrained_fasttext_model": "cc.de.300.bin",
     "k_fold_splits": 10,
     "ft_model": "nn",
@@ -49,7 +46,7 @@ DEFAULT_CONFIG = {
 }
 
 # caching funktion zur Datensatzerstellung
-@mem.cache
+#@mem.cache
 def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
     # ich erzeuge für fasttext und meta jeweils die grunddaten
     fasttext_df, X_meta, y_meta = Datengenerierer.make_dataset(configuration)
@@ -59,16 +56,16 @@ def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
     return fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z
 
 def main():
-    run = wandb.init(project="Masterarbeit_ft", entity="awiedenroth")
+    run = wandb.init(project="Masterarbeit_preliminaries", entity="awiedenroth")
     print(wandb.config)
+    #configuration = DEFAULT_CONFIG
     configuration = {k: v for k, v in wandb.config.items()}
+
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
 
-    # Todo: aufzeichnen wieviel prozent der Daten durch cleaning rausgechmissen werden, jeweils für wörterbuch und welle 1 daten
     fasttext_df = clean_data(fasttext_df, configuration)
     if configuration["fasttext_zusatzdaten"] == True and configuration["selbstständige"] == "ohne":
         fasttext_wb_df = clean_data(fasttext_wb_df, configuration)
-        fasttext_wb_df = remove_duplicates(fasttext_wb_df, configuration)
     #dict zum abspeichern der ergebnisse
     ergebnisse = []
     #meta_ergebnisse = []
@@ -93,15 +90,15 @@ def main():
         X_train_fasttext, y_train_fasttext, X_test_fasttext, y_test_fasttext = \
             PS_Datengenerierer.make_ps_data_ft(fasttext_df, fasttext_wb_df, configuration, train_index, test_index)
 
-        X_train_meta, y_train_meta, X_test_meta, y_test_meta = \
-            PS_Datengenerierer.make_ps_data_meta(X_meta, y_meta, X_meta_z, y_meta_z, configuration, train_index, test_index)
+        #X_train_meta, y_train_meta, X_test_meta, y_test_meta = \
+         #   PS_Datengenerierer.make_ps_data_meta(X_meta, y_meta, X_meta_z, y_meta_z, configuration, train_index, test_index)
 
         print("Gesamtanzahl Datenpunkte Grunddaten vor k-split = ", len(fasttext_df))
         print("Anzahl Trainingsdaten ohne Zusatzdaten", len(fasttext_df)-len(X_test_fasttext))
         print("Anzahl Fasttext Trainingsdaten inklusive Zusatzdaten", len(X_train_fasttext))
         print("Anzahl fasttext Validierungsdaten = ", len(X_test_fasttext))
-        print("Anzahl meta Trainingsdaten inklusive Zusatzdaten = ", len(X_train_meta))
-        print("Anzahl meta Validierungsdaten = ", len(X_test_meta))
+        #print("Anzahl meta Trainingsdaten inklusive Zusatzdaten = ", len(X_train_meta))
+        #print("Anzahl meta Validierungsdaten = ", len(X_test_meta))
 
         #print("trainiere meta Modell")
 
@@ -156,22 +153,22 @@ def main():
 
     #combi_conf_average = calculate_conf_average(combi_conf_ergebnisse)
     #wandb.log({"meta model average performance": meta_average})
-    wandb.log({"fasttext model average performance": ft_average})
+    wandb.log({"average": ft_average})
     #wandb.log({"combi model average performance": combi_average})
 
     #wandb.log({"meta model train average performance": meta_train_average})
-    wandb.log({"fasttext model train average performance": ft_train_average})
+    wandb.log({"train report average": ft_train_average})
     #wandb.log({"combi model train average performance": combi_train_average})
 
     #wandb.log({"meta model validation average performance": meta_val_average})
-    wandb.log({"fasttext model validation average performance": ft_val_average})
+    wandb.log({"val report average": ft_val_average})
     #wandb.log({"combi model validation average performance": combi_val_average})
 
    # wandb.log({"combi confidence model average performance": combi_conf_average})
-    wandb.log({"Gesamtanzahl Datenpunkte Grunddaten vor k-split = ": len(fasttext_df),
+    wandb.log({"Anzahl Datenpunkte Grunddaten vor k-split = ": len(fasttext_df),
                "Anzahl Trainingsdaten ohne Zusatzdaten": len(fasttext_df) - len(X_test_fasttext),
-               "Anzahl Fasttext Trainingsdaten inklusive Zusatzdaten": len(X_train_fasttext),
-               "Anzahl fasttext Validierungsdaten = ": len(X_test_fasttext),
+               "Anzahl Trainingsdaten inklusive Zusatzdaten": len(X_train_fasttext),
+               "Anzahl Validierungsdaten = ": len(X_test_fasttext),
                #"Anzahl meta Trainingsdaten inklusive Zusatzdaten = ": len(X_train_meta),
                #"Anzahl meta Validierungsdaten = ": len(X_test_meta)
                })
