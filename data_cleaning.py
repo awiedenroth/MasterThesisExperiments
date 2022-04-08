@@ -22,8 +22,10 @@ string.punctuation
 @mem.cache
 def clean_data(fasttext_df, config):
 
-    if config["remove_num_punc_low"] == True:
+    if config["lowercase"] == True:
         fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: lowercase(x))
+
+    if config["remove_num_punc"] == True:
         fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: remove_punctuation(x))
         fasttext_df["taetigk"] = fasttext_df["taetigk"].apply(lambda x: remove_numbers(x))
 
