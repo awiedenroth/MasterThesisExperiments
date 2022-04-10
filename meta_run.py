@@ -8,7 +8,6 @@ from postsplit_datengenerierung import PS_Datengenerierer
 from presplit_datengenerierung import Datengenerierer
 from zusatzdatengenerierung import Zusatzdatengenerierer
 from data_cleaning import clean_data
-from data_cleaning import remove_duplicates
 from modelltraining import train_ft
 from modelltraining import train_meta
 from modelltraining import train_combi
@@ -173,8 +172,10 @@ def main():
                "Anzahl Fasttext Trainingsdaten inklusive Zusatzdaten": len(X_train_fasttext),
                "Anzahl fasttext Validierungsdaten = ": len(X_test_fasttext),
                "Anzahl meta Trainingsdaten inklusive Zusatzdaten = ": len(X_train_meta),
-               "Anzahl meta Validierungsdaten = ": len(X_test_meta)})
     """
+    wandb.log({"Anzahl Trainingsdaten ohne Zusatzdaten": len(fasttext_df) - len(X_test_meta),
+               "Anzahl meta Trainingsdaten inklusive Zusatzdaten = ": len(X_train_meta),
+               "Anzahl meta Validierungsdaten = ": len(X_test_meta)})
     pprint(meta_average)
     #pprint(ft_average)
     #pprint(combi_average)
