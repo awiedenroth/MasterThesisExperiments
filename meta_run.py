@@ -154,15 +154,15 @@ def main():
     #combi_val_average = calculate_average_report(combi_ergebnisse_val)
 
     #combi_conf_average = calculate_conf_average(combi_conf_ergebnisse)
-    wandb.log({"meta model average performance": meta_average})
+    wandb.log({"average": meta_average})
     #wandb.log({"fasttext model average performance": ft_average})
     #wandb.log({"combi model average performance": combi_average})
 
-    wandb.log({"meta model train average performance": meta_train_average})
+    wandb.log({"train report average": meta_train_average})
     #wandb.log({"fasttext model train average performance": ft_train_average})
     #wandb.log({"combi model train average performance": combi_train_average})
 
-    wandb.log({"meta model validation average performance": meta_val_average})
+    wandb.log({"val report average": meta_val_average})
     #wandb.log({"fasttext model validation average performance": ft_val_average})
     #wandb.log({"combi model validation average performance": combi_val_average})
     """

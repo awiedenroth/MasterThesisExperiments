@@ -171,7 +171,7 @@ def main():
     wandb.log({"Anzahl Datenpunkte Grunddaten vor k-split = ": len(fasttext_df),
                "Anzahl Trainingsdaten ohne Zusatzdaten": len(fasttext_df) - len(X_test_fasttext),
                "Anzahl Trainingsdaten inklusive Zusatzdaten": len(X_train_fasttext),
-               "Anzahl Validierungsdaten = ": len(X_test_fasttext),
+               "Anzahl Validierungsdaten = ": len(X_test_fasttext)
                #"Anzahl meta Trainingsdaten inklusive Zusatzdaten = ": len(X_train_meta),
                #"Anzahl meta Validierungsdaten = ": len(X_test_meta)
                })
