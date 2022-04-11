@@ -2,7 +2,7 @@ from copy import deepcopy
 from typing import Union, Dict, Any
 import time
 
-from networkx.drawing.tests.test_pylab import plt
+from matplotlib import pyplot as plt
 from tqdm import tqdm
 from postsplit_datengenerierung import PS_Datengenerierer
 from presplit_datengenerierung import Datengenerierer
