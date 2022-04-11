@@ -30,11 +30,14 @@ def aggregate_dicts(dict_list: List[Dict[str, Any]])-> Dict[str, List[Any]]:
     return {key: [i[key] for i in dict_list] for key in dict_list[0]}
 
 def reduce_agg_dict(agg_dict: Dict[str, List[Any]], func=np.mean) -> Dict[str, Any]:
-    return {key: func(agg_dict[key]) for key in agg_dict}
+    return {key: np.round(func(agg_dict[key]), decimals=3) for key in agg_dict}
 
+
+# nimmt die liste mit den ergebnissen von jedem run k, gibt zurück liste mit den 25 gelogten metriken, jede der 25 listen
+# enthält k einträge für jeden run
 def list_of_firsts(ergebnisse:List[List[Dict[str, Any]]])->List[List[Dict[str, Any]]]:
     result = []
-    for i in range(len(ergebnisse)):
+    for i in range(len(ergebnisse[0])):
         zwischen = []
         for list in ergebnisse:
             zwischen.append(list[i])

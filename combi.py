@@ -43,7 +43,7 @@ DEFAULT_CONFIG = {
     "path_welle3": "./Daten/wic_beruf-w4_data.csv",
     "path_wb": "./Wörterbücher/Wörterbuch_binär.csv",
     "path_pretrained_fasttext_model": "cc.de.300.bin",
-    "k_fold_splits": 10,
+    "k_fold_splits": 3,
     "ft_model": "nn",
     "meta_model": "xgboost",
     "combi_model": "linear" # "xgboost" oder "nn" oder "linear"
@@ -171,7 +171,9 @@ def main():
     wandb.log({"fasttext val report average": ft_val_average})
     wandb.log({"combi val report average": combi_val_average})
 
-    wandb.log({"combi confidence average": combi_conf_average})
+    for conf in combi_conf_average:
+        wandb.log({f"confidence average @{conf['confidence: ']}": conf})
+
     wandb.log({"Anzahl Datenpunkte Grunddaten vor k-split = ": len(fasttext_df),
                "Anzahl Trainingsdaten ohne Zusatzdaten": len(fasttext_df) - len(X_test_fasttext),
                "Anzahl Trainingsdaten inklusive Zusatzdaten": len(X_train_fasttext),

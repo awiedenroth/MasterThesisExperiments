@@ -108,7 +108,7 @@ class Evaluierer:
         y_val_pred_proba = model.predict_proba(X_val)
 
         result = {}
-        result[f"confidence: "] = confidence
+        result["confidence: "] = confidence
 
         total_val = len(X_val)
         deleted_val = 0
