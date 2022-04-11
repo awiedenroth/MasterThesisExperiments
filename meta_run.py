@@ -22,6 +22,10 @@ from average_calculater import calculate_average
 from average_calculater import calculate_conf_average
 from average_calculater import calculate_average_report
 
+import os
+WANDB_API_KEY = "5a0c9d2c04e141e969e5f63e2c722fe7737846c2"
+os.environ["WANDB_API_KEY"] = WANDB_API_KEY
+
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
