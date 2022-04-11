@@ -30,14 +30,14 @@ if not sys.warnoptions:
 
 DEFAULT_CONFIG = {
     "fasttext_zusatzdaten": False,
-    "meta_zusatzdaten" : False,
-    "selbstständige" : "ohne",
-    "oesch" : "oesch16",
-    "lowercase" : False,
+    "meta_zusatzdaten" : True,
+    "selbstständige" : "nur",
+    "oesch" : "oesch8",
+    "lowercase" : True,
     "remove_stopwords": False,
     "remove_num_punc": False,
     "keyboard_aug" : True,
-    "random_seed": 42,
+    "random_seed": 18,
     "path_welle1": "./Daten/welle1_und_3.csv",
     "path_welle2": "./Daten/wic_beruf-w2_data.csv",
     "path_welle3": "./Daten/wic_beruf-w4_data.csv",
@@ -46,7 +46,7 @@ DEFAULT_CONFIG = {
     "k_fold_splits": 10,
     "ft_model": "nn",
     "meta_model": "xgboost",
-    "combi_model": "nn" # "xgboost" oder "nn" oder "linear"
+    "combi_model": "linear" # "xgboost" oder "nn" oder "linear"
 }
 
 # caching funktion zur Datensatzerstellung
@@ -60,9 +60,10 @@ def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
     return fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z
 
 def main():
-    run = wandb.init(project="combi", entity="awiedenroth")
-    print(wandb.config)
-    configuration = {k:v for k,v in wandb.config.items()}
+    run = wandb.init(project="combi_prelim", entity="awiedenroth", config=DEFAULT_CONFIG)
+    #print(wandb.config)
+    configuration = DEFAULT_CONFIG
+    #configuration = {k:v for k,v in wandb.config.items()}
     assert isinstance(configuration["remove_stopwords"], bool)
 
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)

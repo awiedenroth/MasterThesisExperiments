@@ -107,56 +107,42 @@ class Evaluierer:
         y_train_pred_proba = model.predict_proba(X_train)
         y_val_pred_proba = model.predict_proba(X_val)
 
-        total = len(X_train)
-        deleted = 0
-        X_train_clean = []
-        y_train_clean = []
-        for X_train, y_train, y_train_pred_proba in zip(X_train,y_train,y_train_pred_proba):
+        result = {}
+        result[f"confidence: "] = confidence
 
-            if max(y_train_pred_proba) > confidence:
-                X_train_clean.append(X_train)
-                y_train_clean.append(y_train)
+        total_val = len(X_val)
+        deleted_val = 0
+        X_val_clean = []
+        y_val_clean = []
+        for X_val, y_val, y_val_pred_proba in zip(X_val,y_val,y_val_pred_proba):
+
+            if max(y_val_pred_proba) > confidence:
+                X_val_clean.append(X_val)
+                y_val_clean.append(y_val)
+
             else:
-                deleted += 1
-        if len(y_train_clean) > 1:
-            y_train_pred = model.predict(np.asarray(X_train_clean))
-            y_train = np.asarray(y_train_clean)
+                deleted_val += 1
 
-            total_val = len(X_val)
-            deleted_val = 0
-            X_val_clean = []
-            y_val_clean = []
-            for X_val, y_val, y_val_pred_proba in zip(X_val,y_val,y_val_pred_proba):
+        if len(y_val_clean) > 1:
+            y_val_pred = model.predict(np.asarray(X_val_clean))
+            y_val = np.asarray(y_val_clean)
 
-                if max(y_val_pred_proba) > confidence:
-                    X_val_clean.append(X_val)
-                    y_val_clean.append(y_val)
-
-                else:
-                    deleted_val += 1
-
-            if len(y_val_clean) > 1:
-                y_val_pred = model.predict(np.asarray(X_val_clean))
-                y_val = np.asarray(y_val_clean)
-
-
-                result = {}
-                result[f"confidence: "] = confidence
-                result[f"deleted datapoints @{confidence}: "] = deleted
-                result[f"percentage deleted train @{confidence}: "] = deleted/total
-                result[f"train accuracy @{confidence}: "] = accuracy_score(y_train, y_train_pred)
-                result[f"train balanced acc @{confidence}: "] = balanced_accuracy_score(y_train, y_train_pred)
-                result[f"train balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_train, y_train_pred, adjusted=True)
-                result[f"deleted datapoints val @{confidence}: "] = deleted_val
-                result[f"percentage deleted val @{confidence}: "] = deleted_val / total_val
-                result[f"validation accuracy @{confidence}: "] = accuracy_score(y_val, y_val_pred)
-                result[f"validation balanced acc @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred)
-                result[f"validation balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred, adjusted=True)
-            else:
-                result = {"confidence: ": confidence, f"percentage deleted val @{confidence}: ": "100%"}
+            result[f"deleted datapoints @{confidence}: "] = deleted_val
+            result[f"labelled datapoints @{confidence}: "] = total_val- deleted_val
+            result[f"percentage deleted @{confidence}: "] = deleted_val / total_val
+            result[f"percentage labelled @{confidence}: "] = 1 - (deleted_val / total_val)
+            result[f"validation accuracy @{confidence}: "] = accuracy_score(y_val, y_val_pred)
+            result[f"validation balanced acc @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred)
+            result[f"validation balanced adjusted accuracy @{confidence}: "] = balanced_accuracy_score(y_val, y_val_pred, adjusted=True)
         else:
-            result = {"confidence: " : confidence, f"percentage deleted val @{confidence}: ": "100%"}
+            result[f"deleted datapoints @{confidence}: "] = deleted_val
+            result[f"labelled datapoints @{confidence}: "] = total_val- deleted_val
+            result[f"percentage deleted @{confidence}: "] = deleted_val / total_val
+            result[f"percentage labelled @{confidence}: "] = 1 - (deleted_val / total_val)
+            result[f"validation accuracy @{confidence}: "] = 0
+            result[f"validation balanced acc @{confidence}: "] = 0
+            result[f"validation balanced adjusted accuracy @{confidence}: "] = 0
 
-        wandb.log({f"combi model run {run} at confidence {confidence}": result})
+        wandb.log({f"combi conf. {confidence} run {run}": result})
 
         return result
