@@ -139,6 +139,8 @@ def main():
             evaluation_combi_confidence.append(Evaluierer.make_evaluation_confidence(combi_model, X_train_combi, y_train_combi, X_test_combi, y_test_combi, confidence, run=i))
         combi_conf_ergebnisse.append(evaluation_combi_confidence)
 
+        plt.clf()
+        plt.cla()
         zeit = round(time.time() - start_time) / 60
         wandb.log({f"Dauer Durchlauf {i}min: ": zeit})
         i = i+1
@@ -182,8 +184,6 @@ def main():
     pprint(ft_average)
     pprint(combi_average)
     pprint(combi_conf_average)
-    plt.clf()
-    plt.cla()
     run.finish()
 
 if __name__ == '__main__':
