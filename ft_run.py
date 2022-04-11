@@ -30,15 +30,15 @@ if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 DEFAULT_CONFIG = {
-    "fasttext_zusatzdaten": True,
+    "fasttext_zusatzdaten": False,
     "meta_zusatzdaten" : False,
     "selbstständige" : "ohne",
-    "oesch" : "oesch8",
+    "oesch" : "oesch16",
     "lowercase" : False,
     "remove_stopwords": False,
     "remove_num_punc": False,
     "keyboard_aug" : True,
-    "random_seed": 22,
+    "random_seed": 42,
     "path_welle1": "./Daten/welle1_und_3.csv",
     "path_welle2": "./Daten/wic_beruf-w2_data.csv",
     "path_welle3": "./Daten/wic_beruf-w4_data.csv",
@@ -62,10 +62,8 @@ def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
 
 def main():
     run = wandb.init(project="ft_oesch8_nur", entity="awiedenroth")
-    print("wandb says: ", wandb.config)
-    #configuration = DEFAULT_CONFIG
-    configuration = {k: v for k, v in wandb.config.items()}
-    print("actual conf:", configuration)
+    print(wandb.config)
+    configuration = {k:v for k,v in wandb.config.items()}
     assert isinstance(configuration["remove_stopwords"], bool)
 
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)

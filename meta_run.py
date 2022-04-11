@@ -1,4 +1,3 @@
-from copy import deepcopy
 from typing import Union, Dict, Any
 import time
 
@@ -36,14 +35,13 @@ DEFAULT_CONFIG = {
     "oesch" : "oesch16",
     "lowercase" : False,
     "remove_stopwords": False,
-    "remove_numbers": False,
-    "remove_punctuation": False,
-    "keyboard_aug" : False,
+    "remove_num_punc": False,
+    "keyboard_aug" : True,
     "random_seed": 42,
     "path_welle1": "./Daten/welle1_und_3.csv",
     "path_welle2": "./Daten/wic_beruf-w2_data.csv",
     "path_welle3": "./Daten/wic_beruf-w4_data.csv",
-    "path_wb": "./Wörterbücher/wic_wörterbuch_aufbereitet_oesch.csv",
+    "path_wb": "./Wörterbücher/Wörterbuch_binär.csv",
     "path_pretrained_fasttext_model": "cc.de.300.bin",
     "k_fold_splits": 10,
     "ft_model": "nn",
@@ -62,16 +60,16 @@ def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
     return fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z
 
 def main():
-    run = wandb.init(project="Masterarbeit_meta", entity="awiedenroth")
+    run = wandb.init(project="combi", entity="awiedenroth")
     print(wandb.config)
     configuration = {k:v for k,v in wandb.config.items()}
+    assert isinstance(configuration["remove_stopwords"], bool)
+
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
 
-    # Todo: aufzeichnen wieviel prozent der Daten durch cleaning rausgechmissen werden, jeweils für wörterbuch und welle 1 daten
-    #fasttext_df = clean_data(fasttext_df, configuration)
-    #if configuration["fasttext_zusatzdaten"] == True and configuration["selbstständige"] == "ohne":
-    #    fasttext_wb_df = clean_data(fasttext_wb_df, configuration)
-    #    fasttext_wb_df = remove_duplicates(fasttext_wb_df, configuration)
+    fasttext_df = clean_data(fasttext_df, configuration)
+    if configuration["fasttext_zusatzdaten"] == True and configuration["selbstständige"] == "ohne":
+        fasttext_wb_df = clean_data(fasttext_wb_df, configuration)
     #dict zum abspeichern der ergebnisse
     ergebnisse = []
     meta_ergebnisse = []
