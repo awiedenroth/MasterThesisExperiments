@@ -60,10 +60,10 @@ def instantiate_dataset(configuration: Dict[str, Union[bool,str]]) -> Any:
     return fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z
 
 def main():
-    run = wandb.init(project="combi_prelim", entity="awiedenroth", config=DEFAULT_CONFIG)
-    #print(wandb.config)
-    configuration = DEFAULT_CONFIG
-    #configuration = {k:v for k,v in wandb.config.items()}
+    run = wandb.init(project="combi_prelim", entity="awiedenroth")
+    print(wandb.config)
+    #configuration = DEFAULT_CONFIG
+    configuration = {k:v for k,v in wandb.config.items()}
     assert isinstance(configuration["remove_stopwords"], bool)
 
     fasttext_df, X_meta, y_meta, fasttext_wb_df, X_meta_z, y_meta_z = instantiate_dataset(configuration)
