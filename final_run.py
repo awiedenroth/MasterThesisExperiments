@@ -41,7 +41,7 @@ DEFAULT_CONFIG = {
     "remove_stopwords": True,
     "remove_num_punc": True,
     "keyboard_aug" : True,
-    "random_seed": 2,
+    "random_seed": 444,
     "path_welle1": "./Daten/welle1_und_3.csv",
     "path_welle2": "./Daten/wic_beruf-w2_data.csv",
     #"path_welle3": "./Daten/wic_beruf-w4_data.csv",
@@ -50,7 +50,7 @@ DEFAULT_CONFIG = {
     "k_fold_splits": 0,
     "ft_model": "nn",
     "meta_model": "xgboost",
-    "combi_model": "nn" # "xgboost" oder "nn" oder "linear"
+    "combi_model": "linear" # "xgboost" oder "nn" oder "linear"
 }
 
 
