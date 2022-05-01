@@ -36,12 +36,12 @@ DEFAULT_CONFIG = {
     "fasttext_zusatzdaten": False,
     "meta_zusatzdaten" : True,
     "selbstständige" : "nur",
-    "oesch" : "oesch8",
+    "oesch" : "oesch16",
     "lowercase" : False,
     "remove_stopwords": True,
-    "remove_num_punc": False,
+    "remove_num_punc": True,
     "keyboard_aug" : True,
-    "random_seed": 444,
+    "random_seed": 2,
     "path_welle1": "./Daten/welle1_und_3.csv",
     "path_welle2": "./Daten/wic_beruf-w2_data.csv",
     #"path_welle3": "./Daten/wic_beruf-w4_data.csv",
@@ -50,7 +50,7 @@ DEFAULT_CONFIG = {
     "k_fold_splits": 0,
     "ft_model": "nn",
     "meta_model": "xgboost",
-    "combi_model": "linear" # "xgboost" oder "nn" oder "linear"
+    "combi_model": "nn" # "xgboost" oder "nn" oder "linear"
 }
 
 
@@ -204,53 +204,53 @@ def main():
 
     # hier muss ich sicherheitshalber alles nochmal abspeichern!!
     # für jeden durchgang jeweils meta model, ft model, combi model, meta_train, meta_val, ft_train, ft_val, combi_train, combi_val, und jeweils ergebnisse und report ergebnisse
-    with open("./TestDataset/oesch8_nur/meta_model.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/meta_model.pkl", "wb") as f:
         pickle.dump(meta_model, f)
-    with open("./TestDataset/oesch8_nur/ft_model.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/ft_model.pkl", "wb") as f:
         pickle.dump(fasttext_model, f)
-    with open("./TestDataset/oesch8_nur/combi_model.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/combi_model.pkl", "wb") as f:
         pickle.dump(combi_model, f)
 
-    with open("./TestDataset/oesch8_nur/meta_Xtrain.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/meta_Xtrain.pkl", "wb") as f:
         pickle.dump(X_train_meta, f)
-    with open("./TestDataset/oesch8_nur/ft_Xtrain.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/ft_Xtrain.pkl", "wb") as f:
         pickle.dump(X_train_fasttext, f)
-    with open("./TestDataset/oesch8_nur/combi_Xtrain.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/combi_Xtrain.pkl", "wb") as f:
         pickle.dump(X_train_combi, f)
 
-    with open("./TestDataset/oesch8_nur/meta_ytrain.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/meta_ytrain.pkl", "wb") as f:
         pickle.dump(y_train_meta, f)
-    with open("./TestDataset/oesch8_nur/ft_ytrain.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/ft_ytrain.pkl", "wb") as f:
         pickle.dump(y_train_fasttext, f)
-    with open("./TestDataset/oesch8_nur/combi_ytrain.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/combi_ytrain.pkl", "wb") as f:
         pickle.dump(y_train_combi, f)
 
-    with open("./TestDataset/oesch8_nur/meta_Xtest.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/meta_Xtest.pkl", "wb") as f:
         pickle.dump(X_test_meta, f)
-    with open("./TestDataset/oesch8_nur/ft_Xtest.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/ft_Xtest.pkl", "wb") as f:
         pickle.dump(X_test_fasttext, f)
-    with open("./TestDataset/oesch8_nur/combi_Xtest.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/combi_Xtest.pkl", "wb") as f:
         pickle.dump(X_test_combi, f)
 
-    with open("./TestDataset/oesch8_nur/meta_ytest.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/meta_ytest.pkl", "wb") as f:
         pickle.dump(y_test_meta, f)
-    with open("./TestDataset/oesch8_nur/ft_ytest.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/ft_ytest.pkl", "wb") as f:
         pickle.dump(y_test_fasttext, f)
-    with open("./TestDataset/oesch8_nur/combi_ytest.pkl", "wb") as f:
+    with open("./TestDataset/oesch16_nur/combi_ytest.pkl", "wb") as f:
         pickle.dump(y_test_combi, f)
 
-    json.dump(evaluation_meta, open("./TestDataset/oesch8_nur/meta_result.json", 'w'))
-    json.dump(evaluation_fasttext, open("./TestDataset/oesch8_nur/ft_result.json", 'w'))
-    json.dump(evaluation_combi, open("./TestDataset/oesch8_nur/combi_result.json", 'w'))
-    json.dump(evaluation_combi_confidence, open("./TestDataset/oesch8_nur/combi_conf_result.json", 'w'))
+    json.dump(evaluation_meta, open("./TestDataset/oesch16_nur/meta_result.json", 'w'))
+    json.dump(evaluation_fasttext, open("./TestDataset/oesch16_nur/ft_result.json", 'w'))
+    json.dump(evaluation_combi, open("./TestDataset/oesch16_nur/combi_result.json", 'w'))
+    json.dump(evaluation_combi_confidence, open("./TestDataset/oesch16_nur/combi_conf_result.json", 'w'))
 
-    json.dump(evaluation_meta_train, open("./TestDataset/oesch8_nur/meta_report_train.json", 'w'))
-    json.dump(evaluation_fasttext_train, open("./TestDataset/oesch8_nur/ft_report_train.json", 'w'))
-    json.dump(evaluation_combi_train, open("./TestDataset/oesch8_nur/combi_report_train.json", 'w'))
+    json.dump(evaluation_meta_train, open("./TestDataset/oesch16_nur/meta_report_train.json", 'w'))
+    json.dump(evaluation_fasttext_train, open("./TestDataset/oesch16_nur/ft_report_train.json", 'w'))
+    json.dump(evaluation_combi_train, open("./TestDataset/oesch16_nur/combi_report_train.json", 'w'))
 
-    json.dump(evaluation_meta_val, open("./TestDataset/oesch8_nur/meta_report_test.json", 'w'))
-    json.dump(evaluation_fasttext_val, open("./TestDataset/oesch8_nur/ft_report_test.json", 'w'))
-    json.dump(evaluation_combi_val, open("./TestDataset/oesch8_nur/combi_report_test.json", 'w'))
+    json.dump(evaluation_meta_val, open("./TestDataset/oesch16_nur/meta_report_test.json", 'w'))
+    json.dump(evaluation_fasttext_val, open("./TestDataset/oesch16_nur/ft_report_test.json", 'w'))
+    json.dump(evaluation_combi_val, open("./TestDataset/oesch16_nur/combi_report_test.json", 'w'))
 
 
     pprint(meta_ergebnisse)
